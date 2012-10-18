@@ -32,8 +32,6 @@ class Process
       return self
     end
 
-    puts @cli.join(' ')
-
     (@timeout * 20).times do
       # Check if the browser exited.
       begin
