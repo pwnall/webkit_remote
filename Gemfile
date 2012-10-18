@@ -1,15 +1,11 @@
-source "http://rubygems.org"
-# Add dependencies required to use your gem here.
-# Example:
-#   gem "activesupport", ">= 2.3.5"
+source 'http://rubygems.org'
+gem 'posix-spawn', '>= 0.3.6'
 
-# Add dependencies to develop your gem here.
-# Include everything needed to run rake, tests, features, etc.
 group :development do
-  gem "minitest", ">= 0"
-  gem "yard", "~> 0.7"
-  gem "rdoc", "~> 3.12"
-  gem "bundler", "~> 1.0.0"
-  gem "jeweler", "~> 1.8.4"
-  gem "rcov", ">= 0"
+  gem 'bundler', '>= 1.2.1'
+  gem 'jeweler', '>= 1.8.4'
+  gem 'minitest', '>= 4.1.0'
+  gem 'rdoc', '>= 3.12'
+  gem 'simplecov', '>= 0.7.1'
+  gem 'yard', '>= 0.8.3'
 end
