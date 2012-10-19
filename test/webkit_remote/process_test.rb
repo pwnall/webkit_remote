@@ -1,7 +1,5 @@
 require File.expand_path('../helper.rb', File.dirname(__FILE__))
 
-require 'net/http'
-
 describe WebkitRemote::Process do
   before :each do
     @process = WebkitRemote::Process.new port: 9669

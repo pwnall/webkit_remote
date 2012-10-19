@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'net/http'
 require 'posix/spawn'
 require 'tmpdir'
 
@@ -152,6 +153,6 @@ class Process
     @chrome_binary ||= nil
   end
   @chrome_binary = false
-end
+end  # class WebkitRemote::Browser
 
 end  # namespace WebkitRemote
