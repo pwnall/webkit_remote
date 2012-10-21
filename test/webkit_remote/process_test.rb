@@ -5,7 +5,7 @@ describe WebkitRemote::Process do
     @process = WebkitRemote::Process.new port: 9669
   end
   after :each do
-    @process.stop
+    @process.stop if @process
   end
 
   describe '#running' do
@@ -19,7 +19,8 @@ describe WebkitRemote::Process do
       @browser = @process.start
     end
     after :each do
-      @process.stop
+      @browser.close if @browser
+      @process.stop if @process
     end
 
     it 'makes running? return true' do

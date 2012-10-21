@@ -6,7 +6,7 @@ describe WebkitRemote::Browser do
     @process.start
   end
   after :each do
-    @process.stop
+    @process.stop if @process
   end
 
   describe 'with process' do
@@ -14,7 +14,7 @@ describe WebkitRemote::Browser do
       @browser = WebkitRemote::Browser.new process: @process
     end
     after :each do
-      @browser.close
+      @browser.close if @browser
     end
 
     it 'sets the host and port correctly' do
@@ -57,7 +57,7 @@ describe WebkitRemote::Browser do
       @browser = WebkitRemote::Browser.new host: 'localhost', port: 9669
     end
     after :each do
-      @browser.close
+      @browser.close if @browser
     end
 
     it "does not support process auto-stopping" do
