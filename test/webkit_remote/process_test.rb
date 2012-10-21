@@ -16,7 +16,7 @@ describe WebkitRemote::Process do
 
   describe '#start' do
     before :each do
-      @process.start
+      @browser = @process.start
     end
     after :each do
       @process.stop
@@ -26,8 +26,10 @@ describe WebkitRemote::Process do
       @process.running?.must_equal true
     end
 
-    it 'sets up a http server that responds to /json' do
-      Net::HTTP.get(URI.parse('http://localhost:9669/json')).wont_be :empty?
+    it 'returns a Browser instance that does not auto-stop the process' do
+      @browser.must_be_kind_of WebkitRemote::Browser
+      @browser.closed?.must_equal false
+      @browser.stop_process?.must_equal false
     end
 
     describe '#stop' do
@@ -41,8 +43,8 @@ describe WebkitRemote::Process do
 
       it 'kills the http server that responds to /json' do
         lambda {
-          Net::HTTP.get(URI.parse('http://localhost:9669/json'))
-        }.must_raise Errno::ECONNREFUSED
+          @browser.tabs
+        }.must_raise EOFError
       end
     end
   end

@@ -25,12 +25,12 @@ class Process
 
   # Starts the browser process.
   #
-  # @return [WebkitRemote::Process] self
+  # @return [WebkitRemote::Browser] self
   def start
     return self if running?
     unless @pid = POSIX::Spawn.spawn(*@cli)
       # The launch failed
-      return self
+      return nil
     end
 
     (@timeout * 20).times do
@@ -43,21 +43,20 @@ class Process
 
       # Check if the browser finished starting up.
       begin
-        Net::HTTP.get(URI.parse('http://localhost:9669/json'))
+        browser = WebkitRemote::Browser.new process: self
         @running = true
-        return self
+        return browser
       rescue SystemCallError  # most likely ECONNREFUSED
         Kernel.sleep 0.05
       end
     end
     # The browser failed, or was too slow to start.
-    self
+    nil
   end
 
   # @return [Boolean] true if the Webkit process is running
-  def running?
-    @running
-  end
+  attr_reader :running
+  alias_method :running?, :running
 
   # Stops the browser process.
   #
@@ -74,6 +73,9 @@ class Process
     @running = false
     self
   end
+
+  # @return [Integer] port that the process' remote debugging server listens to
+  attr_reader :port
 
   # Remove temporary directory if it's still there at garbage collection time.
   def finalize
@@ -110,7 +112,7 @@ class Process
       '--no-message-box',  # don't let user scripts show dialogs
       '--no-service-autorun',  # don't mess with autorun settings
       '--noerrdialogs',  # don't hang on error dialogs
-      "--remote-debugging-port=#{@port}",
+      "--remote-debugging-port=#{@port}",  # Webkit remote debugging
       "--user-data-dir=#{@data_dir}",  # really ensure a clean slate
       '--window-position=0,0',  # remove randomness source
       '--window-size=128,128',  # remove randomness source
