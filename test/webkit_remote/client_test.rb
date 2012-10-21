@@ -1,5 +1,3 @@
-require File.expand_path('../helper.rb', File.dirname(__FILE__))
-
 describe WebkitRemote::Client do
   before :each do
     @process = WebkitRemote::Process.new port: 9669
@@ -30,40 +28,19 @@ describe WebkitRemote::Client do
   end
 
   describe 'rpc' do
-    before do
-      @result = @client.rpc 'Runtime.evaluate', expression: '1 + 2',
-                                                returnByValue: true
+    it 'is is a non-closed WebkitRemote::Rpc instance' do
+      @client.rpc.must_be_kind_of WebkitRemote::Rpc
+      @client.rpc.closed?.must_equal false
     end
 
-    it 'produces the correct result' do
-      @result.must_include 'result'
-      @result['result'].must_include 'value'
-      @result['result']['value'].must_equal 3
-      @result['result'].must_include 'type'
-      @result['result']['type'].must_equal 'number'
-    end
-  end
-
-  describe 'each_event' do
-    before do
-      @client.rpc 'Page.enable'
-      @client.rpc 'Page.navigate', url: fixture_url(:load)
-      @events = []
-      @client.each_event do |event|
-        @events << event
-        break if event[:name] == 'Page.loadEventFired'
+    describe 'after calling close' do
+      before do
+        @client.close
       end
-    end
 
-    it 'only yields events' do
-      @events.each do |event|
-        event.must_include :name
-        event.must_include :data
+      it 'is closed' do
+        @client.rpc.closed?.must_equal true
       end
-    end
-
-    it 'contains a Page.loadEventFired event' do
-      @events.map { |e| e[:name] }.must_include 'Page.loadEventFired'
     end
   end
 end

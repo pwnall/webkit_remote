@@ -21,7 +21,7 @@ require 'thread'
 Thread.abort_on_exception = true
 
 pid = Process.spawn 'bundle exec puma --port 9969 --quiet test/fixtures/config.ru',
-                    :out => '/dev/null'
+                    :in => '/dev/null', :out => '/dev/null'
 Process.detach pid
 at_exit do
   Process.kill 'TERM', pid
