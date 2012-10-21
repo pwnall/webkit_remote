@@ -36,10 +36,8 @@ describe WebkitRemote::Rpc do
       @events = []
       @rpc.each_event do |event|
         @events << event
-        p event
         break if event[:name] == 'Page.loadEventFired'
       end
-      p 'each_event exited'
     end
 
     it 'only yields events' do
@@ -47,12 +45,10 @@ describe WebkitRemote::Rpc do
         event.must_include :name
         event.must_include :data
       end
-      p 'yield test done'
     end
 
     it 'contains a Page.loadEventFired event' do
       @events.map { |e| e[:name] }.must_include 'Page.loadEventFired'
-      p 'event test done'
     end
   end
 end
