@@ -4,12 +4,17 @@ describe WebkitRemote::Client do
     @process.start
     @browser = WebkitRemote::Browser.new process: @process, stop_process: true
     tab = @browser.tabs.first
-    @client = WebkitRemote::Client.new tab: tab, close_browser: true
+    @client = WebkitRemote::Client.new tab: tab
   end
   after :each do
     @client.close if @client
     @browser.close if @browser
     @process.stop if @process
+  end
+
+  it 'sets close_browser to false, browser to the given Browser instance' do
+    @client.close_browser?.must_equal false
+    @client.browser.must_equal @browser
   end
 
   describe 'close with close_browser is true' do
@@ -35,11 +40,12 @@ describe WebkitRemote::Client do
 
     describe 'after calling close' do
       before do
+        @client_rpc = @client.rpc
         @client.close
       end
 
-      it 'is closed' do
-        @client.rpc.closed?.must_equal true
+      it 'the Rpc instance is closed' do
+        @client_rpc.closed?.must_equal true
       end
     end
   end

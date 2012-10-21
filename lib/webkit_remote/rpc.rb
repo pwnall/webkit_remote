@@ -12,9 +12,6 @@ class Rpc
   # @param [Hash] opts info on the tab to connect to
   # @option opts [WebkitRemote::Tab] tab reference to the tab whose debugger
   #     server this RPC client connects to
-  # @option opts [Boolean] close_browser if true, the session to the brower
-  #     that the tab belongs to will be closed when this RPC
-  #     client's connection is closed
   def initialize(opts = {})
     unless tab = opts[:tab]
       raise ArgumentError, 'Target tab not specified'
@@ -75,11 +72,15 @@ class Rpc
   # Closes the connection to the remote debugging server.
   #
   # Call this method to avoid leaking resources.
+  #
+  # @return [WebkitRemote::Rpc] self
   def close
     return if @closed
     @closed = true
     @web_socket.close
+    @web_socket = nil
     self.class.em_stop
+    self
   end
 
   # @return [Boolean] if true, the connection to the remote debugging server

@@ -1,6 +1,5 @@
-# Top-level namespace.
-module WebkitRemote
-end
+module WebkitRemote; end
+require 'webkit_remote/top_level.rb'
 
 require 'webkit_remote/browser.rb'
 require 'webkit_remote/client.rb'

@@ -50,7 +50,6 @@ class Browser
     @http.finish
     @http = nil
     @process.stop if @stop_process
-    @process = nil
     self
   end
 

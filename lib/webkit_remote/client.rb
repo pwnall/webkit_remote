@@ -10,8 +10,8 @@ class Client
   # @option opts [WebkitRemote::Tab] tab reference to the tab whose debugger
   #     server this RPC client connects to
   # @option opts [Boolean] close_browser if true, the session to the brower
-  #     that the tab belongs to will be closed when this RPC
-  #     client's connection is closed
+  #     that the tab belongs to will be closed when this RPC client's
+  #     connection is closed
   def initialize(opts = {})
     unless tab = opts[:tab]
       raise ArgumentError, 'Target tab not specified'
@@ -25,11 +25,15 @@ class Client
   # Closes the remote debugging connection.
   #
   # Call this method to avoid leaking resources.
+  #
+  # @return [WebkitRemote::Rpc] self
   def close
     return if @closed
     @closed = true
     @rpc.close
+    @rpc = nil
     @browser.close if @close_browser
+    self
   end
 
   # @return [Boolean] if true, the connection to the remote debugging server
@@ -47,6 +51,10 @@ class Client
   # @return [WebkitRemote::Rpc] the WebSocket RPC client; useful for making raw
   #     RPC calls to unsupported methods
   attr_reader :rpc
+
+  # @return [WebkitRemote::Browser] master session to the browser that owns the
+  #     tab debugged by this client
+  attr_reader :browser
 end  # class WebkitRemote::Client
 
 end  # namespace WebkitRemote
