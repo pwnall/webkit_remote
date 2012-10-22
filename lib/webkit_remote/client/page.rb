@@ -22,9 +22,10 @@ module Page
   #     page's frames after reloading
   # @return [WebkitRemote::Client] self
   def refresh(opts = {})
-    options = { ignoreCache: !!opts[:skip_cache] }
+    options = {}
+    options[:ignoreCache] = true if opts[:skip_cache]
     options[:scriptToEvaluateOnLoad] = opts[:onload] if opts[:onload]
-    @rpc.call 'Page.refresh'
+    @rpc.call 'Page.refresh', options
     self
   end
 
@@ -35,7 +36,7 @@ module Page
   def page_events=(new_page_events)
     if !!new_page_events != page_events
       @page_events = !!new_page_events
-      @rpc.call(@page_events ? 'Page.enabled' : 'Page.disabled')
+      @rpc.call(@page_events ? 'Page.enable' : 'Page.disable')
     end
     new_page_events
   end

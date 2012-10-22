@@ -32,6 +32,28 @@ describe WebkitRemote::Client do
     end
   end
 
+  describe 'each_event' do
+    before do
+      @client.rpc.call 'Page.enable'
+      @client.rpc.call 'Page.navigate', url: fixture_url(:load)
+      @events = []
+      @client.each_event do |event|
+        @events << event
+        break if event.kind_of?(WebkitRemote::Event::PageLoaded)
+      end
+    end
+
+    it 'only yields events' do
+      @events.each do |event|
+        event.must_be_kind_of WebkitRemote::Event
+      end
+    end
+
+    it 'contains a PageLoaded instance' do
+      @events.map(&:class).must_include WebkitRemote::Event::PageLoaded
+    end
+  end
+
   describe 'rpc' do
     it 'is is a non-closed WebkitRemote::Rpc instance' do
       @client.rpc.must_be_kind_of WebkitRemote::Rpc

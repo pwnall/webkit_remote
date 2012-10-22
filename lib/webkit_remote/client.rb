@@ -48,6 +48,20 @@ class Client
   attr_accessor :close_browser
   alias_method :close_browser?, :close_browser
 
+  # Continuously reports events sent by the remote debugging server.
+  #
+  # @yield once for each RPC event received from the remote debugger; break to
+  #     stop the event listening loop
+  # @yieldparam [WebkitRemote::Event] event an instance of an Event sub-class
+  #     that best represents the received event
+  # @return [WebkitRemote::Client] self
+  def each_event
+    @rpc.each_event do |rpc_event|
+      yield WebkitRemote::Event.for(rpc_event)
+    end
+    self
+  end
+
   # @return [WebkitRemote::Rpc] the WebSocket RPC client; useful for making raw
   #     RPC calls to unsupported methods
   attr_reader :rpc

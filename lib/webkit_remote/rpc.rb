@@ -33,8 +33,9 @@ class Rpc
   #     https://developers.google.com/chrome-developer-tools/docs/protocol/1.0/index
   #
   # @param [String] method name of the RPC method to be invoked
-  # @param [Hash, nil] params parameters for the RPC method to be invoked
-  # @return [Hash] the return value of the RPC method
+  # @param [Hash<String, Object>, nil] params parameters for the RPC method to
+  #     be invoked
+  # @return [Hash<String, Object>] the return value of the RPC method
   def call(method, params = nil)
     request_id = @next_id
     @next_id += 1
@@ -57,8 +58,9 @@ class Rpc
   #
   # @yield once for each RPC event received from the remote debugger; break to
   #     stop the event listening loop
-  # @yieldparam [Hash] event the name and information hash of the event, under
-  #     the keys :name and :data
+  # @yieldparam [Hash<Symbol, Object>] event the name and information hash of
+  #     the event, under the keys :name and :data
+  # @return [WebkitRemote::Rpc] self
   def each_event
     loop do
       if @events.empty?
@@ -67,6 +69,7 @@ class Rpc
         yield @events.shift
       end
     end
+    self
   end
 
   # Closes the connection to the remote debugging server.
@@ -127,13 +130,13 @@ class Rpc
   #
   # @param [Integer, nil] expected_id if a RPC response is expected, this
   #     argument has the response id; otherwise, the argument should be nil
-  # @return [Hash, nil] a Hash containing the RPC result if an expected RPC
-  #     response was received; nil if an RPC notice was received
+  # @return [Hash<String, Object>, nil] a Hash containing the RPC result if an
+  #     expected RPC response was received; nil if an RPC notice was received
   def receive_message(expected_id)
     json = @recv_queue.pop
     unless json.respond_to? :to_str
       close
-      raise RuntimeError, 'The server closed the WebSocket'
+      raise RuntimeError, 'The Webkit debugging server closed the WebSocket'
     end
     begin
       data = JSON.parse json
@@ -158,7 +161,7 @@ class Rpc
       return nil
     else
       close
-      raise RuntimeError, "Invalid JSON RPC message #{data.inspect}"
+      raise RuntimeError, "Unexpected / invalid RPC message #{data.inspect}"
     end
   end
   private :receive_message

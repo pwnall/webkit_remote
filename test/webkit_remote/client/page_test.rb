@@ -11,11 +11,12 @@ describe WebkitRemote::Client::Page do
   describe 'navigate' do
     before do
       @url = fixture_url(:load)
+      @client.page_events = true
       @client.navigate_to @url
       @events = []
       @client.each_event do |event|
         @events << event
-        break if event.kind_of?(WebkitRemote::Events::PageLoaded)
+        break if event.kind_of?(WebkitRemote::Event::PageLoaded)
       end
     end
 
@@ -24,7 +25,7 @@ describe WebkitRemote::Client::Page do
     end
 
     it 'fires a PageLoaded event' do
-      @events.map(&:class).must_include WebkitRemote::Events::PageLoaded
+      @events.map(&:class).must_include WebkitRemote::Event::PageLoaded
     end
   end
 end
