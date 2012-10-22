@@ -55,6 +55,8 @@ class Client
   # @return [WebkitRemote::Browser] master session to the browser that owns the
   #     tab debugged by this client
   attr_reader :browser
+
+  include WebkitRemote::Client::Page
 end  # class WebkitRemote::Client
 
 end  # namespace WebkitRemote
