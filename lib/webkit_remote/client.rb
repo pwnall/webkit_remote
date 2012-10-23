@@ -80,10 +80,15 @@ class Client
   # Registers a module initializer.
   def self.initalizer(name)
     before_name = :"initialize_modules_before_#{name}"
-    # if
+    alias_method before_name, :initialize_modules
+    remove_method :initialize_modules
+    eval <<END_METHOD
+      def initialize_modules
+        #{name}
+        #{before_name.to_s}
+      end
+END_METHOD
   end
-
-  include WebkitRemote::Client::Page
 end  # class WebkitRemote::Client
 
 end  # namespace WebkitRemote

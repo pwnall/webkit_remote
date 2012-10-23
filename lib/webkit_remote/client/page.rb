@@ -52,6 +52,8 @@ module Page
 end  # module WebkitRemote::Client::Page
 
 initializer :initialize_page
+include WebkitRemote::Client::Page
+
 end  # namespace WebkitRemote::Client
 
 end  # namespace WebkitRemote
