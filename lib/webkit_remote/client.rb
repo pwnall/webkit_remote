@@ -20,6 +20,7 @@ class Client
     @browser = tab.browser
     @close_browser = opts.fetch :close_browser, false
     @closed = false
+    initialize_modules
   end
 
   # Closes the remote debugging connection.
@@ -69,6 +70,18 @@ class Client
   # @return [WebkitRemote::Browser] master session to the browser that owns the
   #     tab debugged by this client
   attr_reader :browser
+
+  # Call by the constructor. Replaced by the module initializers.
+  #
+  # @private Hook for module initializers to do their own setups.
+  def initialize_modules
+  end
+
+  # Registers a module initializer.
+  def self.initalizer(name)
+    before_name = :"initialize_modules_before_#{name}"
+    # if
+  end
 
   include WebkitRemote::Client::Page
 end  # class WebkitRemote::Client

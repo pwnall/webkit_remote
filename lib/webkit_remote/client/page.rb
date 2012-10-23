@@ -42,11 +42,16 @@ module Page
   end
 
   # @return [Boolean] true if the debugger generates Page.* events
-  def page_events
-    !!@page_events
+  attr_reader :page_events
+
+  # @private Called by the Client constructor to set up Page data structures.
+  def initialize_page
+    @page_events = nil
   end
+
 end  # module WebkitRemote::Client::Page
 
+initializer :initialize_page
 end  # namespace WebkitRemote::Client
 
 end  # namespace WebkitRemote

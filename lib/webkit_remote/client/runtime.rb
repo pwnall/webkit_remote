@@ -21,8 +21,9 @@ end  # module WebkitRemote::Client::Runtime
 
 # Mirrors a RemoteObject, defined in the Runtime domain.
 class RemoteObject
-  def initialize(raw_object)
-
+  #
+  def initialize(raw_object, client)
+    @client = client
   end
 end  # class WebkitRemote::Client::RemoteObject
 
