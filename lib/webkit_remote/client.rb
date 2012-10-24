@@ -78,7 +78,7 @@ class Client
   end
 
   # Registers a module initializer.
-  def self.initalizer(name)
+  def self.initializer(name)
     before_name = :"initialize_modules_before_#{name}"
     alias_method before_name, :initialize_modules
     remove_method :initialize_modules

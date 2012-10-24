@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+  <head>
+    <title>WebkitRemote Runtime test</title>
+    <script type="text/javascript">
+      (function() {
+        window.test_fn = function(hello, ruby) {
+          return hello + ruby;
+        };
+        var TestClass = function (hello) {
+          this.hello = hello;
+        };
+        TestClass.prototype.number = 42;
+        TestClass.prototype.test_fn = function(hello, again, ruby) {
+          return hello + again + ruby;
+        };
+        TestClass.prototype.toString = function() {
+          return "TestClass debug description";
+        };
+        window.TestClass = TestClass;
+      })();
+    </script>
+  </head>
+  <body>
+    <p>tbd</p>
+  </body>
+</html>
