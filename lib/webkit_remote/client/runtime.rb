@@ -13,7 +13,7 @@ module Runtime
   #     call to WebkitRemote::Client::RemoteObjectGroup#release
   # @return [WebkitRemote::Client::RemoteObject] self
   def remote_eval(expression, opts = {})
-    group_name = opts['group'] || '_'
+    group_name = opts[:group] || '_'
     # NOTE: returnByValue is always set to false to avoid some extra complexity
     result = @rpc.call 'Runtime.evaluate', expression: expression,
                        objectGroup: group_name
@@ -107,12 +107,10 @@ class RemoteObject
   #
   # @return [Webkit::Client::RemoteObject] self
   def release
-    if @released
-      raise RuntimeError, 'Remote object already released'
-    end
+    return if @released
     @rpc.call 'Runtime.releaseObject', objectId: @remote_id
-    @released = true
     @group.remove self
+    released!
   end
 
   # Wraps a raw object returned by the Webkit remote debugger RPC protocol.
@@ -154,6 +152,7 @@ class RemoteObject
     @group = group
     @client = group.client
     @rpc = client.rpc
+    @released = false
 
     @raw_data = raw_object
     @remote_id = raw_object['objectId']
@@ -175,6 +174,7 @@ class RemoteObject
   # @private Called by RemoteObjectGroup#release_all.
   def released!
     @released = true
+    @group = nil
   end
 end  # class WebkitRemote::Client::RemoteObject
 
@@ -195,10 +195,20 @@ class RemoteObjectGroup
   #
   # @return [Webkit::Client::RemoteObjectGroup] self
   def release_all
+    return if @objects.empty?
     @rpc.call 'Runtime.releaseObjectGroup', objectGroup: name
     @released = true
     @objects.each_value { |object| object.released! }
     @objects.clear
+  end
+
+  # Checks if a remote object was allocated in this group.
+  #
+  # @param [WebkitRemote::Client] object
+  # @return [Boolean] true if the object belongs to this group, so releasing
+  #     the group would get the object released
+  def include?(object)
+    @objects[object.remote_id] == object
   end
 
   # Creates a wrapper for a group of remote objects.

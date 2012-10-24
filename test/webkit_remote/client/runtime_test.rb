@@ -1,6 +1,6 @@
 require File.expand_path('../../helper.rb', File.dirname(__FILE__))
 
-describe WebkitRemote::Client::Page do
+describe WebkitRemote::Client::Runtime do
   before :all do
     @client = WebkitRemote.local port: 9669
     @client.navigate_to fixture_url(:runtime)
@@ -12,7 +12,7 @@ describe WebkitRemote::Client::Page do
   describe 'remote_eval' do
     describe 'for a number' do
       before :each do
-        @number = @client.remote_eval('11 + 31', group: 'no')
+        @number = @client.remote_eval '11 + 31', group: 'no'
       end
       it 'returns a Ruby number' do
         @number.must_equal 42
@@ -24,8 +24,8 @@ describe WebkitRemote::Client::Page do
 
     describe 'for a boolean' do
       before :each do
-        @true = @client.remote_eval('!!1', group: 'no')
-        @false = @client.remote_eval('!!0', group: 'no')
+        @true = @client.remote_eval '!!1', group: 'no'
+        @false = @client.remote_eval '!!0', group: 'no'
       end
       it 'returns a Ruby boolean' do
         @true.must_equal true
@@ -38,7 +38,7 @@ describe WebkitRemote::Client::Page do
 
     describe 'for a string' do
       before :each do
-        @string = @client.remote_eval('"hello Ruby"', group: 'no')
+        @string = @client.remote_eval '"hello Ruby"', group: 'no'
       end
       it 'returns a Ruby string' do
         @string.must_equal 'hello Ruby'
@@ -50,8 +50,8 @@ describe WebkitRemote::Client::Page do
 
     describe 'for an object created via new' do
       before :each do
-        @object = @client.remote_eval('new TestClass("hello Ruby")',
-                                      group: 'yes')
+        @object = @client.remote_eval 'new TestClass("hello Ruby")',
+                                      group: 'yes'
       end
       after :each do
         group = @client.object_group('yes')
@@ -72,8 +72,8 @@ describe WebkitRemote::Client::Page do
 
     describe 'for a JSON object' do
       before :each do
-        @object = @client.remote_eval('({hello: "ruby", answer: 42})',
-                                      group: 'yes')
+        @object = @client.remote_eval '({hello: "ruby", answer: 42})',
+                                      group: 'yes'
       end
       after :each do
         group = @client.object_group('yes')
