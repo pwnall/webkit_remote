@@ -113,6 +113,33 @@ class RemoteObject
     released!
   end
 
+  # Calls a method on this object.
+  #
+  # @param [String] method the name of the method to be called
+  # @param [Array<WebkitRemote::Client::Object, String, Number, Boolean, nil>]
+  #     args the arguments passed to the function
+  # @return [WebkitRemote::Client::Object, String, Number, Boolean, nil] the
+  #     return value of the function
+  def call(method, *args)
+    call_args = args.map do |arg|
+      if arg.kind_of? WebkitRemote::Client::RemoteObject
+        { objectId: arg.remote_id }
+      else
+        { value: arg }
+      end
+    end
+    result = @rpc.call 'Runtime.callFunctionOn', objectId: @remote_id,
+        functionDeclaration: method, arguments: call_args, returnByValue: false
+    object = WebkitRemote::Client::RemoteObject.for result['result'], @client,
+                                                    @group.name
+    if result['wasThrown']
+      # TODO(pwnall): some wrapper for exceptions?
+      object
+    else
+      object
+    end
+  end
+
   # Wraps a raw object returned by the Webkit remote debugger RPC protocol.
   #
   # @private Use WebkitRemote::Client::Runtime#remote_eval instead of calling
@@ -200,6 +227,8 @@ class RemoteObjectGroup
     @released = true
     @objects.each_value { |object| object.released! }
     @objects.clear
+    @client.object_group_remove self
+    self
   end
 
   # Checks if a remote object was allocated in this group.
@@ -246,8 +275,17 @@ class RemoteObjectGroup
   #
   # @private Use WebkitRemote::Client::RemoteObject#release instead of calling
   #     this directly
+  #
+  # @param [WebkitRemote::Client::RemoteObject] the object that will be removed
+  #     from the group
+  # @return [WebkitRemote::Client::RemoteObjectGroup] self
   def remove(object)
     @objects.delete object.remote_id
+    if @objects.empty?
+      @released = true
+      @client.object_group_remove self
+    end
+    self
   end
 end  # class WebkitRemote::Client::RemoteObjectGroup
 

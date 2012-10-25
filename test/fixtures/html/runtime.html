@@ -12,10 +12,14 @@
         };
         TestClass.prototype.number = 42;
         TestClass.prototype.test_fn = function(hello, again, ruby) {
-          return hello + again + ruby;
+          return this.hello + hello + again + ruby;
+        };
+        TestClass.prototype.greetings = function(arg1, arg2) {
+        return new TestClass(this.hello + ', ' + arg1.hello + ' and ' +
+                             arg2.hello);
         };
         TestClass.prototype.toString = function() {
-          return "TestClass debug description";
+          return this.hello;
         };
         window.TestClass = TestClass;
       })();

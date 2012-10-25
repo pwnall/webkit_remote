@@ -42,6 +42,22 @@ describe WebkitRemote::Client::RemoteObjectGroup do
     it 'includes unreleased objects' do
       @group1.include?(@object2).must_equal true
     end
+    it 'does not release the whole group' do
+      @group1.released?.must_equal false
+    end
+
+    describe 'after releasing the only other object in the group' do
+      before :each do
+        @object2.release
+      end
+
+      it 'released the whole group' do
+        @group1.released?.must_equal true
+      end
+      it 'removes the group from the client' do
+        @client.object_group('g1').must_equal nil
+      end
+    end
   end
 
   describe '#release_all' do
@@ -55,6 +71,10 @@ describe WebkitRemote::Client::RemoteObjectGroup do
     end
     it 'does not release objects in other groups' do
       @object3.released?.must_equal false
+    end
+    it 'releases the group and removes the group from the client' do
+      @group1.released?.must_equal true
+      @client.object_group('g1').must_equal nil
     end
   end
 end
