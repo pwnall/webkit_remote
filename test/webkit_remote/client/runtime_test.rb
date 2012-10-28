@@ -3,7 +3,9 @@ require File.expand_path('../../helper.rb', File.dirname(__FILE__))
 describe WebkitRemote::Client::Runtime do
   before :all do
     @client = WebkitRemote.local port: 9669
+    @client.page_events = true
     @client.navigate_to fixture_url(:runtime)
+    @client.wait_for type: WebkitRemote::Event::PageLoaded
   end
   after :all do
     @client.close
@@ -42,6 +44,18 @@ describe WebkitRemote::Client::Runtime do
       end
       it 'returns a Ruby string' do
         @string.must_equal 'hello Ruby'
+      end
+      it 'does not create an object group' do
+        @client.object_group('no').must_equal nil
+      end
+    end
+
+    describe 'for null' do
+      before :each do
+        @null  = @client.remote_eval 'null', group: 'no'
+      end
+      it 'returns nil' do
+        @string.must_equal nil
       end
       it 'does not create an object group' do
         @client.object_group('no').must_equal nil

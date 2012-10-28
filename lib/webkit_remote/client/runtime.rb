@@ -11,7 +11,8 @@ module Runtime
   # @option opts [String, Symbol] group the name of an object group (think
   #     memory pools); the objects in a group can be released together by one
   #     call to WebkitRemote::Client::RemoteObjectGroup#release
-  # @return [WebkitRemote::Client::RemoteObject] self
+  # @return [WebkitRemote::Client::RemoteObject, Boolean, Number, String] the
+  #     result of evaluating the expression
   def remote_eval(expression, opts = {})
     group_name = opts[:group] || '_'
     # NOTE: returnByValue is always set to false to avoid some extra complexity
@@ -33,9 +34,10 @@ module Runtime
   #     object was created
   # @param [Boolean] create if true, fetching a group that does not exist will
   #     create the group; this parameter should only be used internally
-  # @return [WebkitRemote::Client::RemoteObjectGroup, nil] wrapper for the
-  #     group with the given name, or nil if no such group exists (the group
-  #     might have been released)
+  # @return [WebkitRemote::Client::RemoteObject, Boolean, Number, String, nil]
+  #     a Ruby wrapper for the evaluation result; primitives get wrapped by
+  #     standard Ruby classes, and objects get wrapped by RemoteObject
+  #     instances
   def object_group(group_name, create = false)
     group_name = group_name.to_s
     group = @runtime_groups[group_name]
@@ -76,7 +78,7 @@ class RemoteObject
   attr_reader :js_type
 
   # @return [Symbol] an additional type hint for this object; documented values
-  #   are :array, :date, :node, :null, :regexp
+  #     are :array, :date, :node, :null, :regexp
   attr_reader :js_subtype
 
   # @return [String] string that would be displayed in the Webkit console to
@@ -91,13 +93,18 @@ class RemoteObject
   #     (yet) recognized by WebkitRemote
   attr_reader :raw_data
 
+  # @return [Boolean] true if the objects in this group were already released
+  attr_reader :released
+  alias_method :released?, :released
+
   # @return [WebkitRemote::Client] remote debugging client for the browser tab
   #     that owns the objects in this group
   attr_reader :client
 
-  # @return [Boolean] true if the objects in this group were already released
-  attr_reader :released
-  alias_method :released?, :released
+  # @return [WebkitRemote::Client::RemoteObjectGroup] the group that contains
+  #     this object; the object can be released by calling release_all on the
+  #     group
+  attr_reader :group
 
   # @return [String] identifies this object in the remote debugger
   # @private Use the RemoteObject methods instead of calling this directly.
@@ -113,13 +120,42 @@ class RemoteObject
     released!
   end
 
+  # This object's properties.
+  #
+  # If the object's properties have not been retrieved, this method retrieves
+  # them via a RPC call.
+  #
+  # @return [Hash<Symbol, Webkit::Client::RemoteProperty>] frozen Hash containg
+  #     the object's properties
+  def properties
+    @properties || properties!
+  end
+
+  # This object's properties, guaranteed to be fresh.
+  #
+  # This method always reloads the object's properties via a RPC call.
+  #
+  # @return [Hash<Symbol, Webkit::Client::RemoteProperty>] frozen Hash containg
+  #     the object's properties
+  def properties!
+    result = @rpc.call 'Runtime.getProperties', objectId: @remote_id
+    @properties = Hash[
+      result['result'].map do |raw_property|
+        property = WebkitRemote::Client::RemoteProperty.new raw_property, self
+        [property.name, property]
+      end
+    ].freeze
+  end
+
   # Calls a method on this object.
   #
   # @param [String] method the name of the method to be called
   # @param [Array<WebkitRemote::Client::Object, String, Number, Boolean, nil>]
   #     args the arguments passed to the function
-  # @return [WebkitRemote::Client::Object, String, Number, Boolean, nil] the
-  #     return value of the function
+  # @return [WebkitRemote::Client::RemoteObject, Boolean, Number, String, nil]
+  #     a Ruby wrapper for the given raw object; primitives get wrapped by
+  #     standard Ruby classes, and objects get wrapped by RemoteObject
+  #     instances
   def call(method, *args)
     call_args = args.map do |arg|
       if arg.kind_of? WebkitRemote::Client::RemoteObject
@@ -145,19 +181,25 @@ class RemoteObject
   # @private Use WebkitRemote::Client::Runtime#remote_eval instead of calling
   #     this directly.
   #
-  # @param [Hash<String, Object>] raw_object return value of a
+  # @param [Hash<String, Object>] raw_object a RemoteObject instance, according
+  #     to the Webkit remote debugging protocol; this is the return value of a
   #     'Runtime.evaluate' RPC call
   # @param [WebkitRemote::Client::Runtime] client remote debugging client for
   #     the browser tab that owns this object
   # @param [String] group_name name of the object group that will hold this
   #     object; object groups work like memory pools
+  # @return [WebkitRemote::Client::RemoteObject, Boolean, Number, String] a
+  #     Ruby wrapper for the given raw object; primitives get wrapped by
+  #     standard Ruby classes, and objects get wrapped by RemoteObject
+  #     instances
   def self.for(raw_object, client, group_name)
-    if raw_object['objectId']
+    if remote_id = raw_object['objectId']
       group = client.object_group group_name, true
-      return WebkitRemote::Client::RemoteObject.new raw_object, group
+      return group.get(remote_id) ||
+             WebkitRemote::Client::RemoteObject.new(raw_object, group)
     else
       # primitive types
-      case (raw_object['type'] || '').to_sym
+      case raw_object['type'] ? raw_object['type'].to_sym : nil
       when :boolean, :number, :string
         return raw_object['value']
       when :undefined
@@ -165,6 +207,10 @@ class RemoteObject
       when :function
         # TODO(pwnall): Not sure what to do here.
       when :object
+        case raw_object['subtype'] ? raw_object['subtype'].to_sym : nil
+        when :null
+          return nil
+        end
         # TODO(pwnall): Figure this out.
       end
     end
@@ -174,7 +220,7 @@ class RemoteObject
   # Wraps a remote JavaScript object
   #
   # @private RemoteObject#for should be used instead of this, as it handles
-  #   some edge cases
+  #     some edge cases
   def initialize(raw_object, group)
     @group = group
     @client = group.client
@@ -262,13 +308,15 @@ class RemoteObjectGroup
   # @private Use WebkitRemote::Client::Runtime#remote_eval instead of calling
   #     this directly.
   #
-  # @param [WebkitRemote::Client::RemoteObject] the object to be added to this
-  #     group
+  # @param [WebkitRemote::Client::RemoteObject] object the object to be added
+  #     to this group
+  # @return [WebkitRemote::Client::RemoteObjectGroup] self
   def add(object)
     if @released
       raise RuntimeError, 'Remote object group already released'
     end
     @objects[object.remote_id] = object
+    self
   end
 
   # Removes a remote object that was individually released.
@@ -276,8 +324,8 @@ class RemoteObjectGroup
   # @private Use WebkitRemote::Client::RemoteObject#release instead of calling
   #     this directly
   #
-  # @param [WebkitRemote::Client::RemoteObject] the object that will be removed
-  #     from the group
+  # @param [WebkitRemote::Client::RemoteObject] object the object that will be
+  #     removed from the group
   # @return [WebkitRemote::Client::RemoteObjectGroup] self
   def remove(object)
     @objects.delete object.remote_id
@@ -287,7 +335,69 @@ class RemoteObjectGroup
     end
     self
   end
+
+  # Returns the object in this group with a given id.
+  #
+  # This helps avoid creating multiple wrappers for the same object.
+  #
+  # @param [String] remote_id the id to look for
+  # @return [WebkitRemote::Client::RemoteObject, nil] nil if there is no object
+  #     whose remote_id matches the method's parameter
+  def get(remote_id)
+    @objects.fetch remote_id, nil
+  end
 end  # class WebkitRemote::Client::RemoteObjectGroup
+
+# A property of a remote JavaScript object.
+class RemoteProperty
+  # @return [Symbol] the
+  attr_reader :name
+
+  # @return [WebkitRemote::Client::RemoteObject, Boolean, Number, String, nil]
+  #     a Ruby wrapper for the property's value; primitives get wrapped by
+  #     standard Ruby classes, and objects get wrapped by RemoteObject
+  #     instances
+  attr_reader :value
+
+  # @return [Boolean] true if JavaScript code can remove this property
+  attr_reader :configurable
+  alias_method :configurable?, :configurable
+
+  # @return [Boolean] true if JavaScript code can enumerate this property
+  attr_reader :enumerable
+  alias_method :enumerable?, :enumerable
+
+  # @return [Boolean] true if JavaScript code can change this property's value
+  attr_reader :writable
+  alias_method :writable?, :writable
+
+  # @return [WebkitRemote::RemoteObject] the object that this property belongs
+  #     to
+  attr_reader :owner
+
+  # @param [Hash<String, Object>] raw_property a PropertyDescriptor instance,
+  #     according to the Webkit remote debugging protocol; this is an item in
+  #     the array returned by the 'Runtime.getProperties' RPC call
+  # @param [WebkitRemote::Client::RemoteObject] owner the object that this
+  #     property belongs to
+  def initialize(raw_property, owner)
+    # NOTE: these are only used at construction time
+    client = owner.client
+    group_name = owner.group.name
+
+    @owner = owner
+    @name = raw_property['name'].to_sym
+    @configurable = !!raw_property['configurable']
+    @enumerable = !!raw_property['enumerable']
+    @writable = !!raw_property['writable']
+    @js_getter = raw_property['get'] && WebkitRemote::Client::RemoteObject.for(
+        raw_property['get'], client, group_name)
+    @js_setter = raw_property['set'] && WebkitRemote::Client::RemoteObject.for(
+        raw_property['set'], client, group_name)
+    @value = raw_property['value'] && WebkitRemote::Client::RemoteObject.for(
+        raw_property['value'], client, group_name)
+  end
+end  # class WebkitRemote::Client::RemoteProperty
 
 end  # namespace WebkitRemote::Client
 

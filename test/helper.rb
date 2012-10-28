@@ -20,11 +20,18 @@ require 'webkit_remote'
 require 'thread'
 Thread.abort_on_exception = true
 
+# Launch a dev server and wait until it starts.
 pid = Process.spawn 'bundle exec puma --port 9969 --quiet test/fixtures/config.ru',
                     :in => '/dev/null', :out => '/dev/null'
 Process.detach pid
-at_exit do
-  Process.kill 'TERM', pid
+at_exit { Process.kill 'TERM', pid }
+loop do
+  begin
+    response = Net::HTTP.get_response URI.parse('http://localhost:9969')
+    break if response.kind_of?(Net::HTTPSuccess)
+  rescue SystemCallError
+    sleep 0.1
+  end
 end
 
 class MiniTest::Unit::TestCase

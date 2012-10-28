@@ -1,3 +1,5 @@
+require File.expand_path('../helper.rb', File.dirname(__FILE__))
+
 describe WebkitRemote::Client do
   before :each do
     @process = WebkitRemote::Process.new port: 9669
@@ -51,6 +53,28 @@ describe WebkitRemote::Client do
 
     it 'contains a PageLoaded instance' do
       @events.map(&:class).must_include WebkitRemote::Event::PageLoaded
+    end
+  end
+
+  describe 'wait_for' do
+    describe 'with page_events enabled' do
+      before do
+        @client.page_events = true
+        @client.rpc.call 'Page.navigate', url: fixture_url(:load)
+      end
+
+      it 'returns a PageLoaded instance' do
+        @client.wait_for(type: WebkitRemote::Event::PageLoaded).
+                must_be_kind_of WebkitRemote::Event::PageLoaded
+      end
+    end
+
+    describe 'with page_events disabled' do
+      it 'raises ArgumentError' do
+        lambda {
+          @client.wait_for(type: WebkitRemote::Event::PageLoaded)
+        }.must_raise ArgumentError
+      end
     end
   end
 

@@ -3,7 +3,9 @@ require File.expand_path('../../helper.rb', File.dirname(__FILE__))
 describe WebkitRemote::Client::RemoteObjectGroup do
   before :each do
     @client = WebkitRemote.local port: 9669
+    @client.page_events = true
     @client.navigate_to fixture_url(:runtime)
+    @client.wait_for type: WebkitRemote::Event::PageLoaded
 
     @object1 = @client.remote_eval '({})', group: 'g1'
     @object2 = @client.remote_eval '({})', group: 'g1'
@@ -12,9 +14,8 @@ describe WebkitRemote::Client::RemoteObjectGroup do
     @group2 = @client.object_group 'g2'
   end
   after :each do
-    @object1.release
-    @object2.release
-    @object3.release
+    @group1.release_all if @group1
+    @group2.release_all if @group2
     @client.close
   end
 

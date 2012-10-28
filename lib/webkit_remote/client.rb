@@ -10,8 +10,8 @@ class Client
   # @option opts [WebkitRemote::Tab] tab reference to the tab whose debugger
   #     server this RPC client connects to
   # @option opts [Boolean] close_browser if true, the session to the brower
-  #     that the tab belongs to will be closed when this RPC client's
-  #     connection is closed
+  #     that the tab belongs to will be closed when this RPC client's connection
+  #     is closed
   def initialize(opts = {})
     unless tab = opts[:tab]
       raise ArgumentError, 'Target tab not specified'
@@ -63,6 +63,25 @@ class Client
     self
   end
 
+  # Waits for the remote debugging server to send a specific event.
+  #
+  # @param (see WebkitRemote::Event#matches?)
+  # @return [WebkitRemote::Event] the event that matches the class requirement
+  def wait_for(conditions)
+    unless WebkitRemote::Event.can_receive? self, conditions
+      raise ArgumentError, "Cannot receive event with #{conditions.inspect}"
+    end
+
+    returned_event = nil
+    each_event do |event|
+      if event.matches? conditions
+        returned_event = event
+        break
+      end
+    end
+    returned_event
+  end
+
   # @return [WebkitRemote::Rpc] the WebSocket RPC client; useful for making raw
   #     RPC calls to unsupported methods
   attr_reader :rpc
@@ -75,6 +94,7 @@ class Client
   #
   # @private Hook for module initializers to do their own setups.
   def initialize_modules
+    # NOTE: this gets called after all the module initializers complete
   end
 
   # Registers a module initializer.
