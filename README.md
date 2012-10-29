@@ -26,7 +26,7 @@ gem install webkit_remote
 ## Usage
 
 This section only showcases a few features. Read the
-[latest gem release YARD docs](http://rubydoc.info/gems/webkit_remote)
+[YARD docs](http://rdoc.info/github/pwnall/webkit_remote)
 to see everything this gem has to offer.
 
 ### Session Setup
