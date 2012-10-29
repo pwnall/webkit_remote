@@ -79,7 +79,7 @@ describe WebkitRemote::Client::RemoteObject do
     end
   end
 
-  describe 'call' do
+  describe 'bound_call' do
     before :each do
       @object = @client.remote_eval 'new TestClass("hello ruby")', group: 'g1'
     end
@@ -90,7 +90,8 @@ describe WebkitRemote::Client::RemoteObject do
 
     describe 'with a function that operates on primitives' do
       before :each do
-        @result = @object.call 'TestClass.prototype.add3', ' answer:', 4, 2
+        @result = @object.bound_call 'TestClass.prototype.add3',
+                                     ' answer:', 4, 2
       end
       it 'returns a native primitive type' do
         @result.must_equal 'hello ruby answer:42'
@@ -101,8 +102,8 @@ describe WebkitRemote::Client::RemoteObject do
       before :each do
         @arg1 = @client.remote_eval 'new TestClass(" again")', group: 'g1'
         @arg2 = @client.remote_eval 'new TestClass(" ruby")', group: 'g2'
-        @result = @object.call 'TestClass.prototype.add3', ' hello',
-                               @arg1, @arg2
+        @result = @object.bound_call 'TestClass.prototype.add3', ' hello',
+                                     @arg1, @arg2
       end
       it 'returns a native primitive type' do
         @result.must_equal 'hello ruby hello again ruby'
@@ -115,12 +116,13 @@ describe WebkitRemote::Client::RemoteObject do
                                     group: 'g1'
         @arg2 = @client.remote_eval '({hello: "jruby", goodbye: "java2"})',
                                     group: 'g2'
-        @result = @object.call 'TestClass.prototype.greetings', @arg1, @arg2
+        @result = @object.bound_call 'TestClass.prototype.greetings',
+                                     @arg1, @arg2
       end
       it 'passes the objects and returns an object correctly' do
         @result.must_be_kind_of WebkitRemote::Client::RemoteObject
         @result.js_class_name.must_equal 'TestClass'
-        @result.call('TestClass.prototype.toString').
+        @result.bound_call('TestClass.prototype.toString').
                 must_equal 'hello ruby, rbx and jruby'
       end
       it 'adds the result to the target group' do

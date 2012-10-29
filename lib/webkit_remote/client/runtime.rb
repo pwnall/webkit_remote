@@ -147,16 +147,17 @@ class RemoteObject
     ].freeze
   end
 
-  # Calls a method on this object.
+  # Calls a function with "this" bound to this object.
   #
-  # @param [String] method the name of the method to be called
+  # @param [String] function_expression a JavaScript expression that should
+  #     evaluate to a function
   # @param [Array<WebkitRemote::Client::Object, String, Number, Boolean, nil>]
   #     args the arguments passed to the function
   # @return [WebkitRemote::Client::RemoteObject, Boolean, Number, String, nil]
   #     a Ruby wrapper for the given raw object; primitives get wrapped by
   #     standard Ruby classes, and objects get wrapped by RemoteObject
   #     instances
-  def call(method, *args)
+  def bound_call(function_expression, *args)
     call_args = args.map do |arg|
       if arg.kind_of? WebkitRemote::Client::RemoteObject
         { objectId: arg.remote_id }
@@ -165,7 +166,8 @@ class RemoteObject
       end
     end
     result = @rpc.call 'Runtime.callFunctionOn', objectId: @remote_id,
-        functionDeclaration: method, arguments: call_args, returnByValue: false
+        functionDeclaration: function_expression, arguments: call_args,
+        returnByValue: false
     object = WebkitRemote::Client::RemoteObject.for result['result'], @client,
                                                     @group.name
     if result['wasThrown']
