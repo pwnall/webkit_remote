@@ -62,6 +62,28 @@ describe WebkitRemote::Client::Runtime do
       end
     end
 
+    describe 'for undefined' do
+      before :each do
+        @undefined = @client.remote_eval '(function() {})()', group: 'no'
+      end
+      it 'returns an Undefined object' do
+        @undefined.js_undefined?.must_equal true
+        @undefined.to_s.must_equal ''
+        @undefined.inspect.must_equal 'JavaScript undefined'
+        @undefined.to_a.must_equal []
+        @undefined.to_i.must_equal 0
+        @undefined.to_f.must_equal 0.0
+        @undefined.blank?.must_equal true
+        @undefined.empty?.must_equal true
+      end
+      it 'does not create an object group' do
+        @client.object_group('no').must_equal nil
+      end
+      it 'is idempotent' do
+        @undefined.must_equal @client.remote_eval('(function(){})()')
+      end
+    end
+
     describe 'for an object created via new' do
       before :each do
         @object = @client.remote_eval 'new TestClass("hello Ruby")',
@@ -100,6 +122,32 @@ describe WebkitRemote::Client::Runtime do
         @object.js_class_name.must_equal 'Object'
         @object.description.must_equal 'Object'
       end
+      it 'creates a non-released group' do
+        @client.object_group('yes').wont_equal nil
+        @client.object_group('yes').released?.must_equal false
+      end
+    end
+
+    describe 'for a function' do
+      before :each do
+        @function = @client.remote_eval '(function (a, b) { return a + b; })',
+                                        group: 'yes'
+      end
+      after :each do
+        group = @client.object_group('yes')
+        group.release_all if group
+      end
+
+      it 'returns a RemoteObject instance' do
+        @function.must_be_kind_of WebkitRemote::Client::RemoteObject
+      end
+
+      it 'sets the object properties correctly' do
+        @function.js_class_name.must_equal 'Object'
+        @function.js_type.must_equal :function
+        @function.description.must_equal 'function (a, b) { return a + b; }'
+      end
+
       it 'creates a non-released group' do
         @client.object_group('yes').wont_equal nil
         @client.object_group('yes').released?.must_equal false

@@ -6,6 +6,29 @@ WebKit-based browsers via the
 [WebKit remote debugging protocol](https://www.webkit.org/blog/1875/announcing-remote-debugging-protocol-v1-0/).
 
 
+## Features
+
+This gem can be used to test Web pages in real browsers with minimal intrusion.
+
+Compared to [PhantomJS](http://phantomjs.org/), `webkit_remote` tests will take
+longer, but provide assurance that the code will run as intended on desktop and
+mobile browsers, and can exercise HTML5 features that are not yet
+[supported by Phantom](http://code.google.com/p/phantomjs/wiki/SupportedFeatures).
+
+Compared to [Selenium](http://seleniumhq.org/), `webkit_remote` is less mature,
+and only supports WebKit-based browsers. In return, the gem can support
+(either directly or via extensions) features that have not made their way into
+Selenium's [WebDriver](http://www.w3.org/TR/webdriver/).
+
+Currently, the following sections of the
+[WebKit remote debugging protocol](https://developers.google.com/chrome-developer-tools/docs/protocol/1.0/)
+have been implemented:
+
+* Console
+* Page
+* Remote
+
+
 ## Requirements
 
 The gem is tested against the OSX and Linux builds of Google Chrome. The only
@@ -38,7 +61,6 @@ client = WebkitRemote.local
 launches a separate instance of Google Chrome that is not connected to your
 profile, and sets up a connection to it. Alternatively,
 
-
 ```ruby
 client = WebkitRemote.remote host: 'phone-ip-here', port: 9222
 ```
@@ -51,7 +73,7 @@ connects to a remote WebKit instance
 ```ruby
 client.page_events = true
 client.navigate_to 'http://translate.google.com'
-client.wait_for type: WebkitRemote::Event::PageLoaded
+client.wait_for(type: WebkitRemote::Event::PageLoaded).last
 ```
 
 ### Run JavaScript
@@ -88,6 +110,26 @@ Finally, release the JavaScript objects that the debugger is holding onto.
 ```ruby
 element.group.release_all
 ```
+
+### Read the Console
+
+Produce some console output.
+
+```ruby
+client.console_events = true
+client.remote_eval '(function() { console.warn("hello ruby"); })();'
+```
+
+Take a look at it.
+
+```ruby
+message = client.wait_for(type: WebkitRemote::Event::ConsoleMessage).first
+message.text
+message.level
+message.params
+message.stack_trace
+```
+
 
 ### Clean Up
 

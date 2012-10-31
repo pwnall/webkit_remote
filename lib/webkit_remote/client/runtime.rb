@@ -69,6 +69,47 @@ end  # module WebkitRemote::Client::Runtime
 initializer :initialize_runtime
 include Runtime
 
+# The class of the JavaScript undefined object.
+class UndefinedClass
+  def js_undefined?
+    true
+  end
+
+  def empty?
+    true
+  end
+
+  def blank?
+    true
+  end
+
+  def nil?
+    true
+  end
+
+  def to_a
+    []
+  end
+
+  def to_s
+    ''
+  end
+
+  def to_i
+    0
+  end
+
+  def to_f
+    0.0
+  end
+
+  def inspect
+    'JavaScript undefined'
+  end
+end  # class WebkitRemote::Client::UndefinedClass
+
+Undefined = UndefinedClass.new
+
 # Mirrors a RemoteObject, defined in the Runtime domain.
 class RemoteObject
   # @return [String] the class name computed by WebKit for this object
@@ -205,15 +246,13 @@ class RemoteObject
       when :boolean, :number, :string
         return raw_object['value']
       when :undefined
-        # TODO(pwnall): Not sure what to do here.
-      when :function
-        # TODO(pwnall): Not sure what to do here.
+        return WebkitRemote::Client::Undefined
       when :object
         case raw_object['subtype'] ? raw_object['subtype'].to_sym : nil
         when :null
           return nil
         end
-        # TODO(pwnall): Figure this out.
+        # TODO(pwnall): Any other exceptions?
       end
     end
     raise RuntimeError, "Unable to parse #{raw_object.inspect}"

@@ -8,7 +8,7 @@ module Console
   #
   # @return [WebkitRemote::Client] self
   def clear_console
-    @rpc.call 'Console.clearMessages', url: url
+    @rpc.call 'Console.clearMessages'
     self
   end
 
