@@ -58,7 +58,7 @@ class Client
   # @return [WebkitRemote::Client] self
   def each_event
     @rpc.each_event do |rpc_event|
-      yield WebkitRemote::Event.for(rpc_event)
+      yield WebkitRemote::Event.for(rpc_event, self)
     end
     self
   end
@@ -66,20 +66,19 @@ class Client
   # Waits for the remote debugging server to send a specific event.
   #
   # @param (see WebkitRemote::Event#matches?)
-  # @return [WebkitRemote::Event] the event that matches the class requirement
+  # @return [Array<WebkitRemote::Event>] all the events received, including the
+  #     event that matches the class requirement
   def wait_for(conditions)
     unless WebkitRemote::Event.can_receive? self, conditions
       raise ArgumentError, "Cannot receive event with #{conditions.inspect}"
     end
 
-    returned_event = nil
+    events = []
     each_event do |event|
-      if event.matches? conditions
-        returned_event = event
-        break
-      end
+      events << event
+      break if event.matches?(conditions)
     end
-    returned_event
+    events
   end
 
   # @return [WebkitRemote::Rpc] the WebSocket RPC client; useful for making raw

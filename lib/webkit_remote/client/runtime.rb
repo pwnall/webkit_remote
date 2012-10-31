@@ -39,7 +39,7 @@ module Runtime
   #     standard Ruby classes, and objects get wrapped by RemoteObject
   #     instances
   def object_group(group_name, create = false)
-    group_name = group_name.to_s
+    group_name = group_name.nil? ? nil : group_name.to_s
     group = @runtime_groups[group_name]
     return group if group
     if create

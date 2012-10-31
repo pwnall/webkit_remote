@@ -34,8 +34,9 @@ module Page
   # @param [Boolean] new_page_events if true, the browser debugger will
   #     generate Page.* events
   def page_events=(new_page_events)
-    if !!new_page_events != page_events
-      @page_events = !!new_page_events
+    new_page_events = !!new_page_events
+    if new_page_events != page_events
+      @page_events = new_page_events
       @rpc.call(@page_events ? 'Page.enable' : 'Page.disable')
     end
     new_page_events

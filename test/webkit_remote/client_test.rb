@@ -61,11 +61,12 @@ describe WebkitRemote::Client do
       before do
         @client.page_events = true
         @client.rpc.call 'Page.navigate', url: fixture_url(:load)
+        @events = @client.wait_for type: WebkitRemote::Event::PageLoaded
       end
 
-      it 'returns a PageLoaded instance' do
-        @client.wait_for(type: WebkitRemote::Event::PageLoaded).
-                must_be_kind_of WebkitRemote::Event::PageLoaded
+      it 'returns an array ending with a PageLoaded instance' do
+        @events.wont_be :empty?
+        @events.last.must_be_kind_of WebkitRemote::Event::PageLoaded
       end
     end
 

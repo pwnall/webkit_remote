@@ -7,6 +7,8 @@ require 'webkit_remote/rpc.rb'
 
 require 'webkit_remote/client.rb'
 require 'webkit_remote/event.rb'
+require 'webkit_remote/client/console.rb'
+require 'webkit_remote/client/console_events.rb'
 require 'webkit_remote/client/page.rb'
 require 'webkit_remote/client/page_events.rb'
 require 'webkit_remote/client/runtime.rb'

@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <head>
+    <title>WebkitRemote Console test</title>
+    <script type="text/javascript">
+      // Raw test.
+      console.warn("hello ruby");
+      // Stack test.
+      (function() {
+        function f1() {
+          console.log("stack test");
+        };
+        function f2() {
+          f1();
+        };
+        f2();
+      })();
+      // Arguments test.
+      console.error("params ", 42, true, { hello: "ruby" });
+    </script>
+  </head>
+  <body>
+    <p>Runtime test loaded</p>
+  </body>
+</html>

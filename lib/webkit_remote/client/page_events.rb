@@ -10,14 +10,14 @@ class PageLoaded < WebkitRemote::Event
   attr_reader :timestamp
 
   # @private Use Event#for instead of calling this constructor directly.
-  def initialize(rpc_event)
+  def initialize(rpc_event, client)
     super
     @timestamp = raw_data['timestamp']
   end
 
   # @private Use Event#can_receive instead of calling this directly.
   def self.can_reach?(client)
-    !!client.page_events
+    client.page_events
   end
 end  # class WebkitRemote::Event::PageLoaded
 
@@ -29,14 +29,14 @@ class PageDomReady < WebkitRemote::Event
   attr_reader :timestamp
 
   # @private Use Event#for instead of calling this constructor directly.
-  def initialize(rpc_event)
+  def initialize(rpc_event, client)
     super
     @timestamp = raw_data['timestamp']
   end
 
   # @private Use Event#can_receive instead of calling this directly.
   def self.can_reach?(client)
-    !!client.page_events
+    client.page_events
   end
 end  # class WebkitRemote::Event::PageDomReady
 

@@ -64,11 +64,12 @@ class Event
   #
   # @param [Hash<Symbol, Object>] rpc_event event information yielded by a call
   #     to WebkitRemote::Rpc.each_event
+  # @param [WebkitRemote::Client] the client that received this message
   # @return [WebkitRemote::Event] an instance of an Event subclass that best
   #     represents the given event
-  def self.for(rpc_event)
+  def self.for(rpc_event, client)
     klass = class_for rpc_event[:name]
-    klass.new rpc_event
+    klass.new rpc_event, client
   end
 
   # The WebkitRemote::Event subclass registered to handle an event.
@@ -87,9 +88,13 @@ class Event
   # @private API clients should use Event#for instead of calling the
   #     constructor directly.
   #
+  # If at all possible, subclasses should avoid using the WebkitRemote::Client
+  # instance, to avoid tight coupling.
+  #
   # @param [Hash<Symbol, Object>] rpc_event event information yielded by a call
   #     to WebkitRemote::Rpc.each_event
-  def initialize(rpc_event)
+  # @param [WebkitRemote::Client] the client that received this message
+  def initialize(rpc_event, client)
     @name = rpc_event[:name]
     @domain = rpc_event[:name].split('.', 2).first
     @raw_data = rpc_event[:data] || {}
