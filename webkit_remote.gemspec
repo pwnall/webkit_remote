@@ -5,28 +5,30 @@
 
 Gem::Specification.new do |s|
   s.name = "webkit_remote"
-  s.version = "0.1.0"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Victor Costan"]
-  s.date = "2012-10-29"
+  s.date = "2012-10-31"
   s.description = "Launches Google Chrome instances and controls them via the Remote Debugging server"
   s.email = "victor@costan.us"
   s.extra_rdoc_files = [
     "LICENSE.txt",
-    "README.rdoc"
+    "README.md"
   ]
   s.files = [
     ".document",
     "Gemfile",
     "Gemfile.lock",
     "LICENSE.txt",
-    "README.rdoc",
+    "README.md",
     "Rakefile",
     "VERSION",
     "lib/webkit_remote.rb",
     "lib/webkit_remote/browser.rb",
     "lib/webkit_remote/client.rb",
+    "lib/webkit_remote/client/console.rb",
+    "lib/webkit_remote/client/console_events.rb",
     "lib/webkit_remote/client/page.rb",
     "lib/webkit_remote/client/page_events.rb",
     "lib/webkit_remote/client/runtime.rb",
@@ -35,10 +37,12 @@ Gem::Specification.new do |s|
     "lib/webkit_remote/rpc.rb",
     "lib/webkit_remote/top_level.rb",
     "test/fixtures/config.ru",
+    "test/fixtures/html/console.html",
     "test/fixtures/html/load.html",
     "test/fixtures/html/runtime.html",
     "test/helper.rb",
     "test/webkit_remote/browser_test.rb",
+    "test/webkit_remote/client/console_test.rb",
     "test/webkit_remote/client/page_test.rb",
     "test/webkit_remote/client/remote_object_group_test.rb",
     "test/webkit_remote/client/remote_object_test.rb",
@@ -47,7 +51,8 @@ Gem::Specification.new do |s|
     "test/webkit_remote/event_test.rb",
     "test/webkit_remote/process_test.rb",
     "test/webkit_remote/rpc_test.rb",
-    "test/webkit_remote_test.rb"
+    "test/webkit_remote_test.rb",
+    "webkit_remote.gemspec"
   ]
   s.homepage = "http://github.com/pwnall/webkit_remote"
   s.licenses = ["MIT"]
