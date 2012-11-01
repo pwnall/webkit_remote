@@ -36,8 +36,8 @@ module Page
   def page_events=(new_page_events)
     new_page_events = !!new_page_events
     if new_page_events != page_events
+      @rpc.call(new_page_events ? 'Page.enable' : 'Page.disable')
       @page_events = new_page_events
-      @rpc.call(@page_events ? 'Page.enable' : 'Page.disable')
     end
     new_page_events
   end

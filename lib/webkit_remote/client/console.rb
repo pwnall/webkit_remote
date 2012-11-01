@@ -19,8 +19,8 @@ module Console
   def console_events=(new_console_events)
     new_console_events = !!new_console_events
     if new_console_events != console_events
+      @rpc.call(new_console_events ? 'Console.enable' : 'Console.disable')
       @console_events = new_console_events
-      @rpc.call(@console_events ? 'Console.enable' : 'Console.disable')
     end
     new_console_events
   end

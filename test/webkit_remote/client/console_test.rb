@@ -26,6 +26,12 @@ describe WebkitRemote::Client::Console do
       lambda {
         @client.wait_for type: WebkitRemote::Event::ConsoleMessage
       }.must_raise ArgumentError
+      lambda {
+        @client.wait_for type: WebkitRemote::Event::ConsoleMessageRepeated
+      }.must_raise ArgumentError
+      lambda {
+        @client.wait_for type: WebkitRemote::Event::ConsoleCleared
+      }.must_raise ArgumentError
     end
   end
 
@@ -57,7 +63,6 @@ describe WebkitRemote::Client::Console do
       @messages[0].source_url.must_equal fixture_url(:console)
       @messages[0].source_line.must_equal 7
     end
-
 
     it 'parses the stack trace correctly' do
       @messages[1].text.must_equal 'stack test'
