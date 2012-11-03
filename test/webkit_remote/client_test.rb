@@ -96,5 +96,11 @@ describe WebkitRemote::Client do
       end
     end
   end
+
+  describe 'clear_all' do
+    it 'does not crash' do
+      @client.clear_all
+    end
+  end
 end
 

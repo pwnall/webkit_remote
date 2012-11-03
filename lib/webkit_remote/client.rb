@@ -81,6 +81,23 @@ class Client
     events
   end
 
+  # Removes all the remote debugging data cached by this client.
+  #
+  # Some modules accumulate data throughout the debigging process. For example,
+  # WebkitRemote::Client::Remote#remote_eval and
+  # WebkitRemote::Events#ConsoleMessage build Ruby equivalents of the returned
+  # JavaScript objects, and prevent Chrome from garbage-collecting the
+  # returned JavaScript objects.
+  #
+  # Although modules have individual methods for releasing this data, such as
+  # WebkitRemote::Client::RemoteGroup#release, keeping track of individual data
+  # items is very inconvenient. Therefore, if you need to run a WebkitRemote
+  # client for an extended period of time, you might find it easier to
+  # periodically call this method.
+  def clear_all
+    clear_modules
+  end
+
   # @return [WebkitRemote::Rpc] the WebSocket RPC client; useful for making raw
   #     RPC calls to unsupported methods
   attr_reader :rpc
@@ -88,13 +105,6 @@ class Client
   # @return [WebkitRemote::Browser] master session to the browser that owns the
   #     tab debugged by this client
   attr_reader :browser
-
-  # Call by the constructor. Replaced by the module initializers.
-  #
-  # @private Hook for module initializers to do their own setups.
-  def initialize_modules
-    # NOTE: this gets called after all the module initializers complete
-  end
 
   # Registers a module initializer.
   def self.initializer(name)
@@ -107,6 +117,33 @@ class Client
         #{before_name.to_s}
       end
 END_METHOD
+  end
+
+  # Registers a module clearer.
+  def self.clearer(name)
+    before_name = :"clear_modules_before_#{name}"
+    alias_method before_name, :clear_modules
+    remove_method :clear_modules
+    eval <<END_METHOD
+      def clear_modules
+        #{name}
+        #{before_name.to_s}
+      end
+END_METHOD
+  end
+
+  # Called by the constructor. Aliased by the module initializers.
+  #
+  # @private Hook for module initializers to do their own setups.
+  def initialize_modules
+    # NOTE: this gets called after all the module initializers complete
+  end
+
+  # Called by clear_all.
+  #
+  # @private Hook for modules to run their own clearing code.
+  def clear_modules
+    # NOTE: this gets called after all the module cleaners complete
   end
 end  # class WebkitRemote::Client
 

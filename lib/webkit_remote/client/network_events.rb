@@ -14,6 +14,9 @@ class NetworkRequest < WebkitRemote::Event
   #     caused this request; can be nil
   attr_reader :redirect_response
 
+  # @return [String] the URL of the document that caused this network request
+  attr_reader :document_url
+
   # @return [String] used to correlate events related to the same request
   attr_reader :request_id
 
@@ -107,7 +110,7 @@ class NetworkRequest
   # @return [String] the body of a POST request
   attr_reader :body
 
-  # @private use Event#for instaed of calling this constructor directly
+  # @private use Event#for instead of calling this constructor directly
   #
   # @param [Hash<String, Number>] the raw RPC data for a Response object
   #     in the Network domain
@@ -120,6 +123,7 @@ class NetworkRequest
   end
 end  # class WebkitRemote::Client::NetworkRequest
 
+# Wraps information about responses to network requests.
 class NetworkResponse
   # @return [String] the URL of the response
   attr_reader :url
@@ -150,7 +154,7 @@ class NetworkResponse
   #     already open
   attr_reader :connection_reused
 
-  # @private use Event#for instaed of calling this constructor directly
+  # @private use Event#for instead of calling this constructor directly
   #
   # @param [Hash<String, Number>] the raw RPC data for a Response object
   #     in the Network domain
@@ -221,7 +225,7 @@ class NetworkResourceTiming
   #     headers were received
   attr_reader :receive_headers_end_ms
 
-  # @private use Event#for instaed of calling this constructor directly
+  # @private use Event#for instead of calling this constructor directly
   #
   # @param [Hash<String, Number>] the raw RPC data for a ResourceTiming object
   #     in the Network domain
@@ -241,6 +245,14 @@ class NetworkResourceTiming
     @ssl_end_ms = raw_timing['sslEnd'].to_f
   end
 end  # class WebkitRemote::Client::NetworkResourceTiming
+
+# Wraps information about the reason behind a network request.
+class NetworkRequestInitiator
+  # @private use Event#for instead of calling this constructor directly
+  def initialize(raw_initiator)
+
+  end
+end  # class WebkitRemote::Client::NetworkRequestInitiator
 
 end  # namespace WebkitRemote::Client
 

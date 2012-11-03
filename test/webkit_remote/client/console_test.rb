@@ -46,7 +46,7 @@ describe WebkitRemote::Client::Console do
     end
 
     after :all do
-      @messages.each(&:release_params)
+      @client.clear_all
     end
 
     it 'receives console events' do
@@ -94,6 +94,21 @@ describe WebkitRemote::Client::Console do
 
       it 'emits a ConsoleCleared event' do
         @events.last.must_be_kind_of WebkitRemote::Event::ConsoleCleared
+      end
+    end
+
+    describe 'clear_all' do
+      before :all do
+        @client.clear_all
+        @events = @client.wait_for type: WebkitRemote::Event::ConsoleCleared
+      end
+
+      it 'calls clear_console, which emits a ConsoleCleared event' do
+        @events.last.must_be_kind_of WebkitRemote::Event::ConsoleCleared
+      end
+
+      it 'releases the objects in ConsoleMessage instances' do
+        @messages[2].params[3].released?.must_equal true
       end
     end
   end

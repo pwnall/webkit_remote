@@ -31,7 +31,8 @@ module Runtime
   # Retrieves a group of remote objects by its name.
   #
   # @param [String, Symbol] group_name name given to remote_eval when the
-  #     object was created
+  #     object was created; nil obtains the anonymous group containing the
+  #     un-grouped objects created by Console#MessageReceived
   # @param [Boolean] create if true, fetching a group that does not exist will
   #     create the group; this parameter should only be used internally
   # @return [WebkitRemote::Client::RemoteObject, Boolean, Number, String, nil]
@@ -64,9 +65,20 @@ module Runtime
   def initialize_runtime()
     @runtime_groups = {}
   end
+
+  # Releases all the objects allocated to this runtime.
+  #
+  # @return [WebkitRemote::Client] self
+  def clear_runtime
+    @runtime_groups.each do |name, group|
+      group.release_all
+    end
+    self
+  end
 end  # module WebkitRemote::Client::Runtime
 
 initializer :initialize_runtime
+clearer :clear_runtime
 include Runtime
 
 # The class of the JavaScript undefined object.
@@ -310,7 +322,16 @@ class RemoteObjectGroup
   # @return [Webkit::Client::RemoteObjectGroup] self
   def release_all
     return if @objects.empty?
-    @rpc.call 'Runtime.releaseObjectGroup', objectGroup: name
+
+    if @name == nil
+      # This is the special group that contains un-grouped objects.
+      @objects.values.each do |object|
+        object.release
+      end
+    else
+      @rpc.call 'Runtime.releaseObjectGroup', objectGroup: name
+    end
+
     @released = true
     @objects.each_value { |object| object.released! }
     @objects.clear

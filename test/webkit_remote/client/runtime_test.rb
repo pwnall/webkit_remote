@@ -8,6 +8,7 @@ describe WebkitRemote::Client::Runtime do
     @client.wait_for type: WebkitRemote::Event::PageLoaded
   end
   after :all do
+    @client.clear_all
     @client.close
   end
 
@@ -151,6 +152,26 @@ describe WebkitRemote::Client::Runtime do
       it 'creates a non-released group' do
         @client.object_group('yes').wont_equal nil
         @client.object_group('yes').released?.must_equal false
+      end
+    end
+  end
+
+
+  describe 'clear_all' do
+    describe 'with a named allocated object' do
+      before :each do
+        @object = @client.remote_eval '({hello: "ruby", answer: 42})',
+                                      group: 'yes'
+      end
+      after :each do
+        group = @client.object_group('yes')
+        group.release_all if group
+      end
+
+      it 'releases the object and its group' do
+        @client.clear_all
+        @object.released?.must_equal true
+        @client.object_group('yes').must_equal nil
       end
     end
   end

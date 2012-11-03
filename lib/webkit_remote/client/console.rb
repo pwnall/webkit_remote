@@ -4,14 +4,6 @@ class Client
 
 # API for the Console domain.
 module Console
-  # Removes all the messages in the console.
-  #
-  # @return [WebkitRemote::Client] self
-  def clear_console
-    @rpc.call 'Console.clearMessages'
-    self
-  end
-
   # Enables or disables the generation of events in the Console domain.
   #
   # @param [Boolean] new_console_events if true, the browser debugger will
@@ -25,6 +17,14 @@ module Console
     new_console_events
   end
 
+  # Removes all the messages in the console.
+  #
+  # @return [WebkitRemote::Client] self
+  def clear_console
+    @rpc.call 'Console.clearMessages'
+    self
+  end
+
   # @return [Boolean] true if the debugger generates Console.* events
   attr_reader :console_events
 
@@ -35,6 +35,7 @@ module Console
 end  # module WebkitRemote::Client::Console
 
 initializer :initialize_console
+clearer :clear_console
 include WebkitRemote::Client::Console
 
 end  # namespace WebkitRemote::Client
