@@ -116,7 +116,13 @@ class Process
       "--user-data-dir=#{@data_dir}",  # really ensure a clean slate
       '--window-position=0,0',  # remove randomness source
       '--window-size=128,128',  # remove randomness source
-      'about:blank'  # don't load the homepage
+      'about:blank',  # don't load the homepage
+      {
+        chdir: @data_dir,
+        in: '/dev/null',
+        out: File.join(@data_dir, '.stdout'),
+        err: File.join(@data_dir, '.stderr'),
+      },
     ]
   end
 
