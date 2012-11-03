@@ -30,7 +30,7 @@ module Console
 
   # @private Called by the Client constructor to set up Console data.
   def initialize_console
-    @console_events = nil
+    @console_events = false
   end
 end  # module WebkitRemote::Client::Console
 

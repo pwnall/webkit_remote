@@ -47,7 +47,7 @@ module Page
 
   # @private Called by the Client constructor to set up Page data structures.
   def initialize_page
-    @page_events = nil
+    @page_events = false
   end
 
 end  # module WebkitRemote::Client::Page

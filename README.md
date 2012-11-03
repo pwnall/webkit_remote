@@ -105,10 +105,10 @@ END_JS
 client.remote_eval('window').bound_call js_code, element, '你好'
 ```
 
-Finally, release the JavaScript objects that the debugger is holding onto.
+Finally, release the WebKit state that the debugger is holding onto.
 
 ```ruby
-element.group.release_all
+client.clear_all
 ```
 
 ### Read the Console
@@ -130,8 +130,13 @@ message.params
 message.stack_trace
 ```
 
+Again, release the WebKit state.
 
-### Clean Up
+```ruby
+client.clear_all
+```
+
+### Close the Browser
 
 ```ruby
 client.close
