@@ -45,34 +45,56 @@ describe WebkitRemote::Client::Network do
       @responses = @events.select do |event|
         event.kind_of? WebkitRemote::Event::NetworkResponse
       end
+      @resources = @client.network_resources
     end
 
     it 'receives NetworkRequest events' do
       @requests.wont_be :empty?
     end
 
-    it 'parses the request inside NetworkRequest events correctly' do
+    it 'parses initial requests inside NetworkRequest events correctly' do
       @requests[0].request.must_be_kind_of WebkitRemote::Client::NetworkRequest
       @requests[0].request.url.must_equal fixture_url(:console)
       @requests[0].request.method.must_equal :get
       @requests[0].request.headers.must_include 'User-Agent'
       @requests[0].request.headers['User-Agent'].must_match(/webkit/i)
+      @requests[0].request.initiator.type.must_equal :other
+      @requests[0].request.initiator.stack_trace.must_equal nil
+    end
+
+    it 'parses derived requests inside NetworkRequest events correctly' do
+      @requests[1].document_url.must_equal
+      @requests[1].request.must_be_kind_of WebkitRemote::Client::NetworkRequest
+      @requests[1].request.url.must_equal fixture_url(:console)
+      @requests[0].request.method.must_equal :get
+      @requests[0].request.headers.must_include 'User-Agent'
+      @requests[0].request.headers['User-Agent'].must_match(/webkit/i)
+      @requests[0].request.initiator.type.must_equal :other
+      @requests[0].request.initiator.stack_trace.must_equal nil
+
     end
 
     it 'receives NetworkResponse events' do
       @responses.wont_be :empty?
     end
 
-    it 'parses NetworkRequest and NetworkResponse events correctly' do
+    it 'parses initial NetworkRequest and NetworkResponse events correctly' do
       @responses[0].type.must_equal :document
+      @requests[0].initiator.type.must_equal :other
       @requests[0].loader_id.wont_be :empty?
       @requests[0].loader_id.must_equal @responses[0].loader_id
-      @requests[0].request_id.wont_be :empty?
-      @requests[0].request_id.must_equal @responses[0].request_id
+      @requests[0].resource.remote_id.wont_be :empty?
+      @requests[0].resource.must_equal @responses[0].resource
       @requests[0].timestamp.must_be :<, @responses[0].timestamp
     end
 
+    it 'parses derived NetworkRequest and NetworkResponse events correctly' do
+      @responses[1].type.must_equal :script
+      @responses[2].type.must_equal :image
+    end
+
     it 'parses the response inside NetworkResponse events correctly' do
+      @responses[0].type.must_equal :document
       @responses[0].response.
                    must_be_kind_of WebkitRemote::Client::NetworkResponse
       @responses[0].response.url.must_equal fixture_url(:console)
@@ -86,6 +108,16 @@ describe WebkitRemote::Client::Network do
                    .must_match(/webkit/i)
       @responses[0].response.from_cache.must_equal false
       @responses[0].response.connection_reused.must_equal false
+    end
+
+    it 'collects request and response data in a NetworkResource' do
+      @resources.wont_be :empty?
+
+      @resources[0].request.must_equal @requests[0].request
+      @resources[0].initiator.must_equal @requests[0].initiator
+      @resources[0].response.must_equal @responses[0].response
+      @resources[0].type.must_equal :document
+      @resources[0].client.must_equal @client
     end
   end
 end

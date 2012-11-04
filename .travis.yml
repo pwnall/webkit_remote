@@ -6,5 +6,5 @@ before_install:
   - "sh -e /etc/init.d/xvfb start"
   - "sudo sh -c \"echo \\\"deb https://dl.google.com/linux/deb/ stable main\\\" >> /etc/apt/sources.list\""
   - "sudo wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -"
-  - "sudo apt-get -q -y update"
-  - "sudo apt-get -q -y install google-chrome-stable"
+  - "sudo apt-get -qq update"
+  - "sudo apt-get -qq install google-chrome-stable"

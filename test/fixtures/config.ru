@@ -4,10 +4,14 @@ Bundler.setup :default, :development
 require 'json'
 require 'rack/contrib'
 
+# Compression for Network domain testing.
+use Rack::Deflater
+
 # Custom header for Network domain testing.
 use Rack::ResponseHeaders do |headers|
   headers['X-Unit-Test'] = 'webkit-remote'
 end
+
 # Cache headers for Network domain testing.
 use Rack::StaticCache, urls: ['/html'], root: 'test/fixtures',
                        versioning: false

@@ -65,26 +65,8 @@ class ConsoleMessage < WebkitRemote::Event
       else
         @reason = :other
       end
-      if raw_message['stackTrace']
-        @stack_trace = raw_message['stackTrace'].map do |raw_frame|
-          frame = {}
-          if raw_frame['columnNumber']
-            frame[:column] = raw_frame['columnNumber'].to_i
-          end
-          if raw_frame['lineNumber']
-            frame[:line] = raw_frame['lineNumber'].to_i
-          end
-          if raw_frame['functionName']
-            frame[:function] = raw_frame['functionName']
-          end
-          if raw_frame['url']
-            frame[:url] = raw_frame['url']
-          end
-          frame
-        end
-      else
-        @trace = nil
-      end
+      @stack_trace = WebkitRemote::Event::ConsoleMessage.parse_stack_trace(
+          raw_message['stackTrace'])
       @text = raw_message['text']
       @type = raw_message['type'] ? raw_message['type'].to_sym : nil
       @source_url = raw_message['url']
@@ -106,6 +88,33 @@ class ConsoleMessage < WebkitRemote::Event
   # @private Use Event#can_receive instead of calling this directly.
   def self.can_reach?(client)
     client.console_events
+  end
+
+
+  # Parses a StackTrace object returned by a RPC request.
+  #
+  # @param [Array<String, Object>] raw_stack_trace the raw StackTrace object
+  #     in the Console domain returned by a RPC request
+  # @return [Array<Symbol, Object>] Ruby-friendly stack trace
+  def self.parse_stack_trace(raw_stack_trace)
+    return nil unless raw_stack_trace
+
+    raw_stack_trace.map do |raw_frame|
+      frame = {}
+      if raw_frame['columnNumber']
+        frame[:column] = raw_frame['columnNumber'].to_i
+      end
+      if raw_frame['lineNumber']
+        frame[:line] = raw_frame['lineNumber'].to_i
+      end
+      if raw_frame['functionName']
+        frame[:function] = raw_frame['functionName']
+      end
+      if raw_frame['url']
+        frame[:url] = raw_frame['url']
+      end
+      frame
+    end
   end
 end  # class WebkitRemote::Event::ConsoleMessage
 
