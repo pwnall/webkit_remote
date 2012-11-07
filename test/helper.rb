@@ -17,6 +17,7 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'webkit_remote'
 
+require 'pp'
 require 'thread'
 Thread.abort_on_exception = true
 
@@ -36,8 +37,12 @@ end
 
 class MiniTest::Unit::TestCase
   # URL for a file in the test/fixtures directory.
-  def fixture_url(name)
-    "http://localhost:9969/html/#{name}.html"
+  def fixture_url(name, type = :html)
+    "http://localhost:9969/#{type}/#{name}.#{type}"
+  end
+  # Path to a file in the test/fixtures directory.
+  def fixture_path(name, type = :html)
+    File.join File.dirname(__FILE__), "fixtures/#{type}/#{name}.#{type}"
   end
 end
 

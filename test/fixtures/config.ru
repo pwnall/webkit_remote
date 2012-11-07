@@ -13,7 +13,7 @@ use Rack::ResponseHeaders do |headers|
 end
 
 # Cache headers for Network domain testing.
-use Rack::StaticCache, urls: ['/html'], root: 'test/fixtures',
+use Rack::StaticCache, urls: ['/html', '/js', '/png'], root: 'test/fixtures',
                        versioning: false
 app = lambda do |env|
   [

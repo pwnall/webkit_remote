@@ -182,6 +182,7 @@ class NetworkRequest < WebkitRemote::Event
   # @private Use Event#for instead of calling this constructor directly.
   def initialize(rpc_event, client)
     super
+    @document_url = raw_data['documentURL']
     if raw_data['initiator']
       @initiator = WebkitRemote::Client::NetworkRequestInitiator.new(
           raw_data['initiator'])
@@ -204,6 +205,7 @@ class NetworkRequest < WebkitRemote::Event
     @timestamp = raw_data['timestamp']
 
     @resource = client.network_resource raw_data['requestId']
+    @resource.set_document_url @document_url
     @resource.set_initiator @initiator
     @resource.set_request @request
     # TODO(pwnall): consider tracking redirects
