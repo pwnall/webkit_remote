@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "webkit_remote"
-  s.version = "0.2.0"
+  s.version = "0.3.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Victor Costan"]
-  s.date = "2012-10-31"
+  s.date = "2012-11-08"
   s.description = "Launches Google Chrome instances and controls them via the Remote Debugging server"
   s.email = "victor@costan.us"
   s.extra_rdoc_files = [
@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   ]
   s.files = [
     ".document",
+    ".travis.yml",
     "Gemfile",
     "Gemfile.lock",
     "LICENSE.txt",
@@ -29,6 +30,8 @@ Gem::Specification.new do |s|
     "lib/webkit_remote/client.rb",
     "lib/webkit_remote/client/console.rb",
     "lib/webkit_remote/client/console_events.rb",
+    "lib/webkit_remote/client/network.rb",
+    "lib/webkit_remote/client/network_events.rb",
     "lib/webkit_remote/client/page.rb",
     "lib/webkit_remote/client/page_events.rb",
     "lib/webkit_remote/client/runtime.rb",
@@ -39,10 +42,12 @@ Gem::Specification.new do |s|
     "test/fixtures/config.ru",
     "test/fixtures/html/console.html",
     "test/fixtures/html/load.html",
+    "test/fixtures/html/network.html",
     "test/fixtures/html/runtime.html",
     "test/helper.rb",
     "test/webkit_remote/browser_test.rb",
     "test/webkit_remote/client/console_test.rb",
+    "test/webkit_remote/client/network_test.rb",
     "test/webkit_remote/client/page_test.rb",
     "test/webkit_remote/client/remote_object_group_test.rb",
     "test/webkit_remote/client/remote_object_test.rb",
@@ -72,6 +77,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<minitest>, [">= 4.1.0"])
       s.add_development_dependency(%q<puma>, [">= 1.6.3"])
       s.add_development_dependency(%q<rack>, [">= 1.4.1"])
+      s.add_development_dependency(%q<rack-contrib>, [">= 1.1.0"])
       s.add_development_dependency(%q<rdoc>, [">= 3.12"])
       s.add_development_dependency(%q<ruby-prof>, [">= 0.11.2"])
       s.add_development_dependency(%q<simplecov>, [">= 0.7.1"])
@@ -85,6 +91,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<minitest>, [">= 4.1.0"])
       s.add_dependency(%q<puma>, [">= 1.6.3"])
       s.add_dependency(%q<rack>, [">= 1.4.1"])
+      s.add_dependency(%q<rack-contrib>, [">= 1.1.0"])
       s.add_dependency(%q<rdoc>, [">= 3.12"])
       s.add_dependency(%q<ruby-prof>, [">= 0.11.2"])
       s.add_dependency(%q<simplecov>, [">= 0.7.1"])
@@ -99,6 +106,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<minitest>, [">= 4.1.0"])
     s.add_dependency(%q<puma>, [">= 1.6.3"])
     s.add_dependency(%q<rack>, [">= 1.4.1"])
+    s.add_dependency(%q<rack-contrib>, [">= 1.1.0"])
     s.add_dependency(%q<rdoc>, [">= 3.12"])
     s.add_dependency(%q<ruby-prof>, [">= 0.11.2"])
     s.add_dependency(%q<simplecov>, [">= 0.7.1"])

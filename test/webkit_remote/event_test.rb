@@ -63,6 +63,10 @@ describe WebkitRemote::Event do
         WebkitRemote::Event.can_receive?(@client, name: 'Page.loadEventFired').
                             must_equal false
       end
+      it 'should ignore extra properties' do
+        WebkitRemote::Event.can_receive?(@client, name: 'Page.loadEventFired',
+                                         other_property: true).must_equal false
+      end
     end
 
     describe 'when page_events is true' do
@@ -76,6 +80,10 @@ describe WebkitRemote::Event do
       it 'should be true for Page.loadEventFired' do
         WebkitRemote::Event.can_receive?(@client, name: 'Page.loadEventFired').
                             must_equal true
+      end
+      it 'should ignore extra properties' do
+        WebkitRemote::Event.can_receive?(@client, name: 'Page.loadEventFired',
+                                         other_property: true).must_equal true
       end
     end
   end
