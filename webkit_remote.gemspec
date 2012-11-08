@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = "webkit_remote"
-  s.version = "0.3.0"
+  s.version = "0.3.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Victor Costan"]
@@ -44,6 +44,8 @@ Gem::Specification.new do |s|
     "test/fixtures/html/load.html",
     "test/fixtures/html/network.html",
     "test/fixtures/html/runtime.html",
+    "test/fixtures/js/network.js",
+    "test/fixtures/png/network.png",
     "test/helper.rb",
     "test/webkit_remote/browser_test.rb",
     "test/webkit_remote/client/console_test.rb",
