@@ -56,6 +56,8 @@ class Event
         value.can_reach?(client)
       when :name
         class_for(value).can_reach?(client)
+      else
+        true
       end
     end
   end
