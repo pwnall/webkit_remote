@@ -40,17 +40,34 @@ describe WebkitRemote::Client::Console do
       @client.console_events = true
       @client.navigate_to fixture_url(:console)
       @events = @client.wait_for type: WebkitRemote::Event::PageLoaded
-      @messages = @events.select do |event|
+      @message_events = @events.select do |event|
         event.kind_of? WebkitRemote::Event::ConsoleMessage
       end
+      @repeat_events = @events.select do |event|
+        event.kind_of? WebkitRemote::Event::ConsoleMessageRepeated
+      end
+      @messages = @client.console_messages
     end
 
     after :all do
       @client.clear_all
     end
 
-    it 'receives console events' do
-      @messages.wont_be :empty?
+    it 'receives ConsoleMessage events' do
+      @message_events.wont_be :empty?
+    end
+
+    it 'receives ConsoleMessageRepeated events' do
+      @repeat_events.wont_be :empty?
+    end
+
+    it 'collects messages into Client#console_messages' do
+      @message_events[0].message.must_equal @messages[0]
+      @message_events[1].message.must_equal @messages[1]
+      @message_events[2].message.must_equal @messages[2]
+      @message_events[3].message.must_equal @messages[3]
+      @repeat_events[0].message.must_equal @messages[3]
+      @repeat_events[1].message.must_equal @messages[3]
     end
 
     it 'parses text correctly' do
@@ -86,6 +103,13 @@ describe WebkitRemote::Client::Console do
       @messages[2].params[3].group.name.must_equal nil
     end
 
+    it 'parses repeated messages correctly' do
+      @messages[3].text.must_equal 'one more time'
+      @messages[3].count.must_equal 3
+      @repeat_events[0].count.must_equal 2
+      @repeat_events[1].count.must_equal 3
+    end
+
     describe 'clear_console' do
       before :all do
         @client.clear_console
@@ -108,8 +132,41 @@ describe WebkitRemote::Client::Console do
       end
 
       it 'releases the objects in ConsoleMessage instances' do
-        @messages[2].params[3].released?.must_equal true
+        @message_events[2].message.params[3].released?.must_equal true
       end
+    end
+  end
+
+  describe 'with console and network events enabled' do
+    before :all do
+      @client.console_events = true
+      @client.network_events = true
+      @client.navigate_to fixture_url(:network)
+      @events = @client.wait_for type: WebkitRemote::Event::ConsoleMessage,
+                                 level: :log
+      @message_events = @events.select do |event|
+        event.kind_of? WebkitRemote::Event::ConsoleMessage
+      end
+      @messages = @client.console_messages
+    end
+
+    after :all do
+      @client.clear_all
+    end
+
+    it 'receives ConsoleMessage events' do
+      @message_events.wont_be :empty?
+    end
+
+    it 'associates messages with network requests' do
+      @messages[0].text.must_match /not found/i
+      @messages[0].network_resource.wont_equal nil
+      @messages[0].network_resource.document_url.
+          must_equal fixture_url(:network)
+      @messages[0].level.must_equal :error
+      @messages[0].count.must_equal 1
+      @messages[0].reason.must_equal :network
+      @messages[0].type.must_equal :log
     end
   end
 end

@@ -25,6 +25,7 @@ Currently, the following sections of the
 have been implemented:
 
 * Console
+* Network
 * Page
 * Remote
 
@@ -123,7 +124,8 @@ client.remote_eval '(function() { console.warn("hello ruby"); })();'
 Take a look at it.
 
 ```ruby
-message = client.wait_for(type: WebkitRemote::Event::ConsoleMessage).first
+client.wait_for type: WebkitRemote::Event::ConsoleMessage
+message = client.console_messages.first
 message.text
 message.level
 message.params

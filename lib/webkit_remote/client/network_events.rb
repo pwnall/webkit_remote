@@ -200,7 +200,7 @@ class NetworkRequest < WebkitRemote::Event
           raw_data['redirectResponse'])
     end
     if raw_data['stackTrace']
-      @stack_trace = WebkitRemote::Event::ConsoleMessage.parse_stack_trace(
+      @stack_trace = WebkitRemote::Client::ConsoleMessage.parse_stack_trace(
           raw_initiator['stackTrace'])
     else
       @stack_trace = nil
@@ -568,7 +568,7 @@ class NetworkRequestInitiator
     else
       @line = nil
     end
-    @stack_trace = WebkitRemote::Event::ConsoleMessage.parse_stack_trace(
+    @stack_trace = WebkitRemote::Client::ConsoleMessage.parse_stack_trace(
         raw_initiator['stackTrace'])
     @type = (raw_initiator['type'] || 'other').to_sym
     @url = raw_initiator['url']
