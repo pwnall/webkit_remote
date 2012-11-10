@@ -23,7 +23,8 @@ class Rpc
     @events = []
 
     self.class.em_start
-    @web_socket = Faye::WebSocket::Client.new tab.debug_url
+    @debug_url = tab.debug_url
+    @web_socket = Faye::WebSocket::Client.new @debug_url
     setup_web_socket
   end
 
@@ -90,6 +91,9 @@ class Rpc
   #     has been closed, and this instance is mostly useless
   attr_reader :closed
   alias_method :closed?, :closed
+
+  # @return [String] points to this client's Webkit remote debugging server
+  attr_reader :debug_url
 
   # Hooks up the event handlers of the WebSocket client.
   def setup_web_socket

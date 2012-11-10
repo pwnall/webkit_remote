@@ -1,3 +1,5 @@
+require 'base64'
+
 module WebkitRemote
 
 class Event
@@ -129,7 +131,8 @@ class NetworkMemoryCacheHit < WebkitRemote::Event
     super
 
     if raw_data['resource']
-      @cache_data = raw_data['resource']
+      @cache_data = WebkitRemote::Client::NetworkCacheEntry.new(
+          raw_data['resource'])
     end
     @document_url = raw_data['documentURL']
     if raw_data['initiator']
@@ -324,6 +327,24 @@ class NetworkResource
     @initiator = nil
     @canceled = false
     @last_event = nil
+    @body = false
+  end
+
+  # @return [String] the contents of the resource
+  def body
+    @body ||= body!
+  end
+
+  # Re-fetches the resource from the Webkit remote debugging server.
+  #
+  # @return [String] the contents of the resource
+  def body!
+    result = @client.rpc.call 'Network.getResponseBody', requestId: @remote_id
+    if result['base64Encoded']
+      @body = Base64.decode64 result['body']
+    else
+      @body = result['body']
+    end
   end
 
   # @private Rely on the event processing code to set this property.

@@ -14,7 +14,7 @@ end
 
 # Cache headers for Network domain testing.
 use Rack::StaticCache, urls: ['/html', '/js', '/png'], root: 'test/fixtures',
-                       versioning: false
+                       versioning: false, duration: 24 * 60 * 60
 app = lambda do |env|
   [
     200,

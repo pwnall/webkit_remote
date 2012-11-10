@@ -22,8 +22,8 @@ require 'thread'
 Thread.abort_on_exception = true
 
 # Launch a dev server and wait until it starts.
-pid = Process.spawn 'bundle exec puma --port 9969 --quiet test/fixtures/config.ru',
-                    :in => '/dev/null', :out => '/dev/null'
+pid = Process.spawn 'bundle exec puma --port 9969 --quiet --threads 1:1 ' +
+    'test/fixtures/config.ru', :in => '/dev/null', :out => '/dev/null'
 Process.detach pid
 at_exit { Process.kill 'TERM', pid }
 loop do

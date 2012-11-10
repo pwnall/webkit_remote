@@ -32,6 +32,10 @@ describe WebkitRemote::Client do
     it 'closes the browser master debugging session' do
       @browser.closed?.must_equal true
     end
+
+    it 'still retuns a good inspect string' do
+      @client.inspect.must_match(/<.*WebkitRemote::Client.*>/)
+    end
   end
 
   describe 'each_event' do
@@ -100,6 +104,13 @@ describe WebkitRemote::Client do
   describe 'clear_all' do
     it 'does not crash' do
       @client.clear_all
+    end
+  end
+
+  describe 'inspect' do
+    it 'includes the debugging URL and closed flag' do
+      @client.inspect.must_match(
+        /<WebkitRemote::Client:.*\s+server=".*"\s+closed=.+>/)
     end
   end
 end

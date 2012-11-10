@@ -17,6 +17,7 @@ class Client
       raise ArgumentError, 'Target tab not specified'
     end
     @rpc = WebkitRemote::Rpc.new opts
+    @debug_url = @rpc.debug_url
     @browser = tab.browser
     @close_browser = opts.fetch :close_browser, false
     @closed = false
@@ -144,6 +145,14 @@ END_METHOD
   # @private Hook for modules to run their own clearing code.
   def clear_modules
     # NOTE: this gets called after all the module cleaners complete
+  end
+
+  # Debugging output.
+  def inspect
+    result = self.to_s
+    result[-1, 0] =
+        " server=#{@debug_url.inspect} closed=#{@closed.inspect}"
+    result
   end
 end  # class WebkitRemote::Client
 

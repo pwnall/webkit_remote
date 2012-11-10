@@ -168,7 +168,7 @@ class RemoteObject
   # @return [Webkit::Client::RemoteObject] self
   def release
     return if @released
-    @rpc.call 'Runtime.releaseObject', objectId: @remote_id
+    @client.rpc.call 'Runtime.releaseObject', objectId: @remote_id
     @group.remove self
     released!
   end
@@ -191,7 +191,7 @@ class RemoteObject
   # @return [Hash<Symbol, Webkit::Client::RemoteProperty>] frozen Hash containg
   #     the object's properties
   def properties!
-    result = @rpc.call 'Runtime.getProperties', objectId: @remote_id
+    result = @client.rpc.call 'Runtime.getProperties', objectId: @remote_id
     @properties = Hash[
       result['result'].map do |raw_property|
         property = WebkitRemote::Client::RemoteProperty.new raw_property, self
@@ -218,7 +218,7 @@ class RemoteObject
         { value: arg }
       end
     end
-    result = @rpc.call 'Runtime.callFunctionOn', objectId: @remote_id,
+    result = @client.rpc.call 'Runtime.callFunctionOn', objectId: @remote_id,
         functionDeclaration: function_expression, arguments: call_args,
         returnByValue: false
     object = WebkitRemote::Client::RemoteObject.for result['result'], @client,
@@ -277,7 +277,6 @@ class RemoteObject
   def initialize(raw_object, group)
     @group = group
     @client = group.client
-    @rpc = client.rpc
     @released = false
 
     @raw_data = raw_object
@@ -329,7 +328,7 @@ class RemoteObjectGroup
         object.release
       end
     else
-      @rpc.call 'Runtime.releaseObjectGroup', objectGroup: name
+      @client.rpc.call 'Runtime.releaseObjectGroup', objectGroup: name
     end
 
     @released = true
@@ -359,7 +358,6 @@ class RemoteObjectGroup
   def initialize(name, client)
     @name = name
     @client = client
-    @rpc = client.rpc
     # TODO(pwnall): turn @objects into a set once equality is working
     @objects = {}
     @released = false
