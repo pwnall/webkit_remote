@@ -14,6 +14,13 @@ class Process
   #     the default port is 9292
   # @option opts [Number] timeout number of seconds to wait for the browser
   #     to start; the default timeout is 10 seconds
+  # @option opts [Hash<Symbol, Number>] window set the :left, :top, :width and
+  #     :height of the browser window; by default, the browser window is
+  #     256x256 starting at 0,0.
+  # @option opts [Hash<Symbol, Number>, Boolean] xvfb use Xvfb instead of a
+  #     real screen; set the :display, :width, :height, :depth and :dpi of the
+  #     server, or use the default display number 20, at 1280x1024x32 with
+  #     72dpi
   def initialize(opts = {})
     @port = opts[:port] || 9292
     @timeout = opts[:timeout] || 10
@@ -126,6 +133,39 @@ class Process
     ]
   end
 
+  # Command-line that launchex Xvfb
+  def xvfb_cli(opts)
+    # The OSX man page for Xvfb:
+    #     http://developer.apple.com/library/mac/documentation/darwin/reference/manpages/man1/Xvfb.1.html
+
+    xvfb_opts = opts[:xvfb]
+    unless xvfb_opts.respond_to? :[]
+      xvfb_opts = {}
+    end
+
+    display = xvfb_opts[:display] || 20
+    width = xvfb_opts[:width] || 1280
+    height = xvfb_opts[:height] || 1024
+    depth = xvfb_opts[:depth] || 32
+    dpi = xvfb_opts[:dpi] || 72
+    [
+      self.class.xvfb_binary,
+      ":#{display}",
+      "-screen 0 #{width}x#{height}x#{depth}",
+      "-auth #{File.join(@data_dir, '.Xauthority')}",
+      '-c',
+      "-dpi #{dpi}",
+      '-terminate',
+      '-wr',
+      {
+        chdir: @data_dir,
+        in: '/dev/null',
+        out: File.join(@data_dir, '.X_stdout'),
+        err: File.join(@data_dir, '.X_stderr'),
+      },
+    ]
+  end
+
   # Path to a Google Chrome / Chromium binary.
   #
   # @return [String] full-qualified path to a binary that launches Chrome
@@ -161,6 +201,20 @@ class Process
     @chrome_binary ||= nil
   end
   @chrome_binary = false
+
+  # Path to the Xvfb virtual X server binary.
+  #
+  # @return [String] full-qualified path to a binary that launches Xvfb.
+  def self.xvfb_binary
+    return @xvfb_binary unless @xvfb_binary == false
+
+    path = `which Xvfb`
+    unless path.empty?
+      @xvfb_binary = path.strip
+    end
+    @xvfb_binary = nil
+  end
+  @xvfb_binary = false
 end  # class WebkitRemote::Browser
 
 end  # namespace WebkitRemote

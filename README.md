@@ -37,6 +37,23 @@ platform-dependent functionality is launching and shutting down the browser
 process, everything else should work for any WebKit-based browser that
 implements the remote debugging protocol.
 
+Google Chrome can be used in a headless environment with
+[Xvfb](http://en.wikipedia.org/wiki/Xvfb).
+
+Install Xvfb on Fedora.
+
+```bash
+sudo yum install xorg-x11-server-Xvfb
+```
+
+Install Xvfb on Ubuntu.
+
+```bash
+sudo apt-get install xvfb
+```
+
+Xvfb is included in OSX.
+
 
 ## Installation
 
