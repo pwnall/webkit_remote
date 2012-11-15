@@ -27,16 +27,33 @@ class Process
     @running = false
     @data_dir = Dir.mktmpdir 'webkit-remote'
     @pid = nil
+    @xvfb_pid = nil
     @cli = chrome_cli opts
+    if opts[:xvfb]
+      @xvfb_cli = xvfb_cli opts
+    else
+      @xvfb_cli = nil
+    end
   end
 
   # Starts the browser process.
   #
-  # @return [WebkitRemote::Browser] self
+  # @return [WebkitRemote::Browser] master session to the started Browser
+  #     process; the session's auto_close is set to false so that it can be
+  #     safely discarded; nil if the launch fails
   def start
     return self if running?
+
+    if @xvfb_cli
+      unless @xvfb_pid = POSIX::Spawn.spawn(*@xvfb_cli)
+        # The Xvfb launch failed.
+        return nil
+      end
+    end
+
     unless @pid = POSIX::Spawn.spawn(*@cli)
       # The launch failed
+      stop
       return nil
     end
 
@@ -58,6 +75,7 @@ class Process
       end
     end
     # The browser failed, or was too slow to start.
+    stop
     nil
   end
 
@@ -72,10 +90,28 @@ class Process
   # @return [WebkitRemote::Process] self
   def stop
     return self unless running?
-    begin
-      ::Process.kill 'TERM', @pid
-      ::Process.wait @pid
+    if @pid
+      begin
+        ::Process.kill 'TERM', @pid
+        ::Process.wait @pid
+      rescue SystemCallError
+        # Process died on its own.
+      ensure
+        @pid = nil
+      end
     end
+
+    if @xvfb_pid
+      begin
+        ::Process.kill 'TERM', @xvfb_pid
+        ::Process.wait @xvfb_pid
+      rescue SystemCallError
+        # Process died on its own.
+      ensure
+        @xvfb_pid = nil
+      end
+    end
+
     FileUtils.rm_rf @data_dir if File.exists?(@data_dir)
     @running = false
     self
@@ -97,6 +133,7 @@ class Process
     # The Chromium wiki recommends this page for available flags:
     #     http://peter.sh/experiments/chromium-command-line-switches/
     [
+      chrome_env(opts),
       self.class.chrome_binary,
       '--disable-default-apps',  # no bundled apps
       '--disable-desktop-shortcuts',  # don't mess with the desktop
@@ -128,12 +165,33 @@ class Process
         chdir: @data_dir,
         in: '/dev/null',
         out: File.join(@data_dir, '.stdout'),
-        err: File.join(@data_dir, '.stderr'),
+        err: File.join(@data_dir, '.stderr')
       },
     ]
   end
 
-  # Command-line that launchex Xvfb
+  # Environment variables set when launching Chrome.
+  #
+  # @param [Hash] opts options passed to the WebkitRemote::Process constructor
+  # @return [Hash<String, String>] variables to be added to the environment of
+  #     the Chrome process before launching
+  def chrome_env(opts)
+    if opts[:xvfb]
+      if opts[:xvfb].respond_to?(:[]) and opts[:xvfb][:display]
+        display = opts[:xvfb][:display]
+      else
+        display = 20
+      end
+      { 'DISPLAY' => ":#{display}.0" }
+    else
+      {}
+    end
+  end
+
+  # Command-line that launches Xvfb.
+  #
+  # @param [Hash] opts options passed to the WebkitRemote::Process constructor
+  # @return [Array<String>] command line for launching Xvfb
   def xvfb_cli(opts)
     # The OSX man page for Xvfb:
     #     http://developer.apple.com/library/mac/documentation/darwin/reference/manpages/man1/Xvfb.1.html
@@ -154,7 +212,7 @@ class Process
       "-screen 0 #{width}x#{height}x#{depth}",
       "-auth #{File.join(@data_dir, '.Xauthority')}",
       '-c',
-      "-dpi #{dpi}",
+      '-dpi', dpi.to_s,
       '-terminate',
       '-wr',
       {
@@ -212,7 +270,7 @@ class Process
     unless path.empty?
       @xvfb_binary = path.strip
     end
-    @xvfb_binary = nil
+    @xvfb_binary ||= nil
   end
   @xvfb_binary = false
 end  # class WebkitRemote::Browser

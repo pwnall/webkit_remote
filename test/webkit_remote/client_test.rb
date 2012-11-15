@@ -2,7 +2,7 @@ require File.expand_path('../helper.rb', File.dirname(__FILE__))
 
 describe WebkitRemote::Client do
   before :each do
-    @process = WebkitRemote::Process.new port: 9669
+    @process = WebkitRemote::Process.new port: 9669, xvfb: true
     @process.start
     @browser = WebkitRemote::Browser.new process: @process, stop_process: true
     tab = @browser.tabs.first

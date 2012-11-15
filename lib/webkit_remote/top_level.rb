@@ -7,7 +7,12 @@ module WebkitRemote
   #     WebKit process; the client will automatically stop the process when
   #     closed
   def self.local(opts = {})
+    # Use Xvfb if no desktop is available.
+    if !opts.has_key?(:xvfb) && (!ENV['DISPLAY'] || ENV['DISPLAY'].empty?)
+      opts = { xvfb: true }.merge! opts
+    end
     process = WebkitRemote::Process.new opts
+
     browser = process.start
     browser.stop_process = true
     client = WebkitRemote::Client.new tab: browser.tabs.first,
