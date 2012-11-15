@@ -13,7 +13,7 @@ module Dom
   #
   # @return [WebkitRemote::Client::DomNode] the root DOM node
   def dom_root!
-    result = @client.rpc.call 'DOM.getDocument'
+    result = @rpc.call 'DOM.getDocument'
     @dom_root = dom_update_node result['root']
   end
 
@@ -52,7 +52,7 @@ module Dom
   # @return [WebkitRemote::Client::DomNode] the updated cached information
   def dom_update_node(raw_node)
     remote_id = raw_node['nodeId']
-    dom_node(remote_id).update_all remote_id
+    dom_node(remote_id).update_all raw_node
   end
 end  # module WebkitRemote::Client::Dom
 
@@ -136,7 +136,7 @@ class DomNode
   end
 
   # @return [String] HTML markup for the node and all its contents
-  def outer_html
+  def outer_html!
     result = @client.rpc.call 'DOM.getOuterHTML', nodeId: @remote_id
     @outer_html = result['outerHTML']
   end
@@ -223,7 +223,7 @@ class DomNode
       end
     end
     if raw_node['contentDocument']
-      @content_document = @client.dom_update_node raw_node['contentDocumnet']
+      @content_document = @client.dom_update_node raw_node['contentDocument']
     end
     @document_url = raw_node['documentURL'] if raw_node['documentURL']
     @internal_subset = raw_node['internalSubset'] if raw_node['internalSubset']
@@ -231,7 +231,7 @@ class DomNode
     @attr_name = raw_node['name'] if raw_node['name']
     @name = raw_node['nodeName'] if raw_node['nodeName']
     if raw_node['nodeType']
-      @node_type = NODE_TYPES[raw_node['nodeType']] || raw_node['nodeType']
+      @node_type = NODE_TYPES[raw_node['nodeType'].to_i] || raw_node['nodeType']
     end
     @value = raw_node['nodeValue'] if raw_node['nodeValue']
     @public_id = raw_node['publicId'] if raw_node['publicId']
@@ -239,6 +239,7 @@ class DomNode
     @attr_value = raw_node['value'] if raw_node['value']
     @xml_version = raw_node['xmlVersion'] if raw_node['xmlVersion']
 
+    self
   end
 
   # Maps numeric DOM types to their symbolic representation.
