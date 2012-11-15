@@ -159,7 +159,7 @@ class Process
       "--remote-debugging-port=#{@port}",  # Webkit remote debugging
       "--user-data-dir=#{@data_dir}",  # really ensure a clean slate
       '--window-position=0,0',  # remove randomness source
-      '--window-size=128,128',  # remove randomness source
+      '--window-size=256,256',  # remove randomness source
       'about:blank',  # don't load the homepage
       {
         chdir: @data_dir,
@@ -206,11 +206,17 @@ class Process
     height = xvfb_opts[:height] || 1024
     depth = xvfb_opts[:depth] || 32
     dpi = xvfb_opts[:dpi] || 72
+
+    # https://bugs.freedesktop.org/show_bug.cgi?id=17453
+    if depth == 32
+      depth = '24+32'
+    end
+
     [
       self.class.xvfb_binary,
       ":#{display}",
-      "-screen 0 #{width}x#{height}x#{depth}",
-      "-auth #{File.join(@data_dir, '.Xauthority')}",
+      '-screen', '0', "#{width}x#{height}x#{depth}",
+      '-auth', File.join(@data_dir, '.Xauthority'),
       '-c',
       '-dpi', dpi.to_s,
       '-terminate',
