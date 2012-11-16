@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = "webkit_remote"
-  s.version = "0.4.0"
+  s.version = "0.4.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Victor Costan"]
@@ -32,6 +32,7 @@ Gem::Specification.new do |s|
     "lib/webkit_remote/client/console_events.rb",
     "lib/webkit_remote/client/dom.rb",
     "lib/webkit_remote/client/dom_events.rb",
+    "lib/webkit_remote/client/dom_runtime.rb",
     "lib/webkit_remote/client/network.rb",
     "lib/webkit_remote/client/network_events.rb",
     "lib/webkit_remote/client/page.rb",
