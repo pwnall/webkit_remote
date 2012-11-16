@@ -106,28 +106,22 @@ class DomNode
     @attributes = Hash[result['attributes'].each_slice(2).to_a]
   end
 
-  # Highlights this DOM node.
+  # @return [WebkitRemote::Client::JsObject] this node's JavaScript object
+  def js_object
+    @js_object ||= js_object!
+  end
+
+  # Retrieves this node's JavaScript object, bypassing the node's cache.
   #
-  # @param [Hash<Symbol, Hash>] options colors to be used for highlighting
-  # @option options [Hash<Symbol, Number>] margin color used for highlighting
-  #     the element's border
-  # @option options [Hash<Symbol, Number>] border color used for highlighting
-  #     the element's border
-  # @option options [Hash<Symbol, Number>] padding color used for highlighting
-  #     the element's padding
-  # @option options [Hash<Symbol, Number>] content color used for highlighting
-  #     the element's content
-  # @option options [Boolean] tooltip if true, a tooltip containing node
-  #     information is also shown
-  def highlight!(options)
-    config = {}
-    config[:marginColor] = options[:margin] if options[:margin]
-    config[:borderColor] = options[:border] if options[:border]
-    config[:paddingColor] = options[:padding] if options[:padding]
-    config[:contentColor] = options[:content] if options[:content]
-    config[:showInfo] = true if options[:tooltip]
-    @client.rpc.call 'DOM.highlightNode', nodeId: @remote_id,
-                     highlightConfig: config
+  # @param [String] group the name of an object group (think memory pools); the
+  #     objects in a group can be released together by one call to
+  #     WebkitRemote::Client::JsObjectGroup#release
+  # @return [WebkitRemote::Client::JsObject] this node's JavaScript object
+  def js_object!(group = nil)
+    group ||= @client.object_group_auto_name
+    result = @client.rpc.call 'DOM.resolveNode', nodeId: @remote_id,
+                              groupName: group
+    WebkitRemote::Client::JsObject.for result['object'], @client, group
   end
 
   # @return [String] HTML markup for the node and all its contents
@@ -170,8 +164,8 @@ class DomNode
   # @param [String] attr_name name of the attribute that will be deleted
   # @return [WebkitRemote::Client::DomNode] self
   def remove_attribute(attr_name)
-    @attributes.delete attr_name
-    @client.rpc.call 'DOM.removeAttribute', nodeId: @remoteId, name: attr_name
+    @attributes.delete attr_name if @attributes
+    @client.rpc.call 'DOM.removeAttribute', nodeId: @remote_id, name: attr_name
     self
   end
 
@@ -181,6 +175,30 @@ class DomNode
   def remove
     @client.rpc.call 'DOM.removeNode', nodeId: @remote_id
     self
+  end
+
+  # Highlights this DOM node.
+  #
+  # @param [Hash<Symbol, Hash>] options colors to be used for highlighting
+  # @option options [Hash<Symbol, Number>] margin color used for highlighting
+  #     the element's border
+  # @option options [Hash<Symbol, Number>] border color used for highlighting
+  #     the element's border
+  # @option options [Hash<Symbol, Number>] padding color used for highlighting
+  #     the element's padding
+  # @option options [Hash<Symbol, Number>] content color used for highlighting
+  #     the element's content
+  # @option options [Boolean] tooltip if true, a tooltip containing node
+  #     information is also shown
+  def highlight!(options)
+    config = {}
+    config[:marginColor] = options[:margin] if options[:margin]
+    config[:borderColor] = options[:border] if options[:border]
+    config[:paddingColor] = options[:padding] if options[:padding]
+    config[:contentColor] = options[:content] if options[:content]
+    config[:showInfo] = true if options[:tooltip]
+    @client.rpc.call 'DOM.highlightNode', nodeId: @remote_id,
+                     highlightConfig: config
   end
 
   # @private Use WebkitRemote::Client::Dom#dom_node instead of calling this
@@ -195,6 +213,7 @@ class DomNode
     @content_document = nil
     @document_url = nil
     @internal_subset = nil
+    @js_object = nil
     @local_name = nil
     @name = nil
     @node_type = nil
@@ -250,6 +269,27 @@ class DomNode
     11 => :document_fragment, 12 => :notation
   }.freeze
 end   # class WebkitRemote::Client::DomNode
+
+class JsObject
+  # @return [WebkitRemote::Client::DomNode] the DOM node wrapped by this
+  #     JavaScript object
+  def dom_node
+    @dom_node ||= dom_node!
+  end
+
+  # Fetches the wrapped DOM node, bypassing the object's cache.
+  #
+  # @return [WebkitRemote::Client::DomNode] the DOM domain object wrapped by
+  #     this JavaScript object
+  def dom_node!
+    result = @client.rpc.call 'DOM.requestNode', objectId: @remote_id
+    @dom_node = if result['nodeId']
+      @client.dom_node result['nodeId']
+    else
+      nil
+    end
+  end
+end  # class WebkitRemote::Client::JsObject
 
 end  # namespace WebkitRemote::Client
 

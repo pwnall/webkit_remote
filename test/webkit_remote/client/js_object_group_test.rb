@@ -1,6 +1,6 @@
 require File.expand_path('../../helper.rb', File.dirname(__FILE__))
 
-describe WebkitRemote::Client::RemoteObjectGroup do
+describe WebkitRemote::Client::JsObjectGroup do
   before :each do
     @client = WebkitRemote.local port: 9669
     @client.page_events = true

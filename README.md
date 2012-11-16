@@ -25,6 +25,7 @@ Currently, the following sections of the
 have been implemented:
 
 * Console
+* DOM (incomplete)
 * Network
 * Page
 * Remote
@@ -190,6 +191,21 @@ Clean up.
 client.clear_all
 ```
 
+### Explore the DOM
+
+Find a node and inspect its attributes.
+
+```ruby
+node = client.dom_root.query_selector '[name=text]'
+node.attributes['name']
+node.attributes['id']
+```
+
+Get the JavaScript DOM object for the node and explore its properties.
+
+```ruby
+node.js_object.properties['nodeName'].value
+```
 
 ### Close the Browser
 

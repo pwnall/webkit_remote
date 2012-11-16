@@ -5,6 +5,7 @@ gem 'posix-spawn', '>= 0.3.6'
 
 group :development do
   gem 'bundler', '>= 1.2.1'
+  gem 'debugger', '>= 1.2.1'
   gem 'jeweler', '>= 1.8.4'
   gem 'minitest', '>= 4.1.0'
   gem 'puma', '>= 1.6.3'

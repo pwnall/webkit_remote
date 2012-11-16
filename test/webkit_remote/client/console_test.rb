@@ -98,8 +98,8 @@ describe WebkitRemote::Client::Console do
       @messages[2].params[0, 3].must_equal ['params ', 42, true]
       @messages[2].params.length.must_equal 4
 
-      @messages[2].params[3].must_be_kind_of WebkitRemote::Client::RemoteObject
-      @messages[2].params[3].properties[:hello].value.must_equal 'ruby'
+      @messages[2].params[3].must_be_kind_of WebkitRemote::Client::JsObject
+      @messages[2].params[3].properties['hello'].value.must_equal 'ruby'
       @messages[2].params[3].group.name.must_equal nil
     end
 

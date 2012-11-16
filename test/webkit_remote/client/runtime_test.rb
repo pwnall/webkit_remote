@@ -94,8 +94,8 @@ describe WebkitRemote::Client::Runtime do
         group = @client.object_group('yes')
         group.release_all if group
       end
-      it 'returns an RemoteObject instance' do
-        @object.must_be_kind_of WebkitRemote::Client::RemoteObject
+      it 'returns an JsObject instance' do
+        @object.must_be_kind_of WebkitRemote::Client::JsObject
       end
       it 'sets the object properties correctly' do
         @object.js_class_name.must_equal 'TestClass'
@@ -116,8 +116,8 @@ describe WebkitRemote::Client::Runtime do
         group = @client.object_group('yes')
         group.release_all if group
       end
-      it 'returns an RemoteObject instance' do
-        @object.must_be_kind_of WebkitRemote::Client::RemoteObject
+      it 'returns an JsObject instance' do
+        @object.must_be_kind_of WebkitRemote::Client::JsObject
       end
       it 'sets the object properties correctly' do
         @object.js_class_name.must_equal 'Object'
@@ -139,8 +139,8 @@ describe WebkitRemote::Client::Runtime do
         group.release_all if group
       end
 
-      it 'returns a RemoteObject instance' do
-        @function.must_be_kind_of WebkitRemote::Client::RemoteObject
+      it 'returns a JsObject instance' do
+        @function.must_be_kind_of WebkitRemote::Client::JsObject
       end
 
       it 'sets the object properties correctly' do

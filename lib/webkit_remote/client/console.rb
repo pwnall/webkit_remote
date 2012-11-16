@@ -59,7 +59,7 @@ class ConsoleMessage
   # @return [String] the message text
   attr_reader :text
 
-  # @return [Array<WebkitRemote::Client::RemoteObject>] extra arguments given
+  # @return [Array<WebkitRemote::Client::JsObject>] extra arguments given
   #     to the message
   attr_reader :params
 
@@ -115,7 +115,7 @@ class ConsoleMessage
     end
     if raw_message['parameters']
       @params = raw_message['parameters'].map do |raw_object|
-        WebkitRemote::Client::RemoteObject.for raw_object, client, nil
+        WebkitRemote::Client::JsObject.for raw_object, client, nil
       end
     else
       @params = []
@@ -136,7 +136,7 @@ class ConsoleMessage
   # Releases the JavaScript objects referenced by this message's parameters.
   def release_params
     @params.each do |param|
-      if param.kind_of?(WebkitRemote::Client::RemoteObject)
+      if param.kind_of?(WebkitRemote::Client::JsObject)
         param.release
       end
     end

@@ -1,6 +1,6 @@
 require File.expand_path('../../helper.rb', File.dirname(__FILE__))
 
-describe WebkitRemote::Client::RemoteObject do
+describe WebkitRemote::Client::JsObject do
   before :each do
     @client = WebkitRemote.local port: 9669
     @client.page_events = true
@@ -18,50 +18,57 @@ describe WebkitRemote::Client::RemoteObject do
       end
 
       it 'enumerates the properties correctly' do
-        @object.properties[:answer].name.must_equal :answer
-        @object.properties[:test].name.must_equal :test
-        @object.properties[:other].must_equal nil
+        @object.properties['answer'].name.must_equal 'answer'
+        @object.properties['test'].name.must_equal 'test'
+        @object.properties['other'].must_equal nil
       end
 
       it 'gets the correct values' do
-        @object.properties[:answer].value.must_equal 42
-        @object.properties[:test].value.must_equal true
+        @object.properties['answer'].value.must_equal 42
+        @object.properties['test'].value.must_equal true
       end
 
       it 'sets owner correctly' do
-        @object.properties[:answer].owner.must_equal @object
+        @object.properties['answer'].owner.must_equal @object
       end
 
       it 'does not have extra properties' do
         @object.properties.select { |name, property| property.enumerable? }.
-                keys.sort.must_equal [:answer, :test]
+                keys.sort.must_equal ['answer', 'test']
       end
 
       it 'recognizes writable properties' do
-        @object.properties[:answer].writable?.must_equal true
-        @object.properties[:constructor].writable?.must_equal false
+        @object.properties['answer'].writable?.must_equal true
+        @object.properties['constructor'].writable?.must_equal false
       end
 
       it 'recognizes configurable properties' do
-        @object.properties[:answer].configurable?.must_equal true
-        @object.properties[:constructor].configurable?.must_equal false
+        @object.properties['answer'].configurable?.must_equal true
+        @object.properties['constructor'].configurable?.must_equal false
       end
 
       it 'recognizes enumerable properties' do
-        @object.properties[:answer].enumerable?.must_equal true
-        @object.properties[:constructor].enumerable?.must_equal false
+        @object.properties['answer'].enumerable?.must_equal true
+        @object.properties['constructor'].enumerable?.must_equal false
       end
 
       describe 'after property update' do
         before do
-          @object.properties[:DONE]
+          @object.properties['DONE']
           @client.remote_eval 'window.t.test = "updated"'
         end
         it 'does not automatically refresh' do
-          @object.properties[:test].value.must_equal true
+          @object.properties['test'].value.must_equal true
         end
         it 'refreshes when properties! is called' do
-          @object.properties![:test].value.must_equal 'updated'
+          @object.properties!['test'].value.must_equal 'updated'
+        end
+      end
+
+      describe 'inspect' do
+        it 'contains the property name and its enumerable status' do
+          @object.properties['test'].inspect.must_match(
+            /<WebkitRemote::Client::JsProperty:.*\s+name="test"\s+configurable=.+\s+enumerable=.+>/)
         end
       end
     end
@@ -72,9 +79,9 @@ describe WebkitRemote::Client::RemoteObject do
       end
 
       it 'recognizes configurable, non-writable, enumerable properties' do
-        @object.properties[:DONE].configurable?.must_equal true
-        @object.properties[:DONE].writable?.must_equal false
-        @object.properties[:DONE].enumerable?.must_equal true
+        @object.properties['DONE'].configurable?.must_equal true
+        @object.properties['DONE'].writable?.must_equal false
+        @object.properties['DONE'].enumerable?.must_equal true
       end
     end
   end
@@ -120,7 +127,7 @@ describe WebkitRemote::Client::RemoteObject do
                                      @arg1, @arg2
       end
       it 'passes the objects and returns an object correctly' do
-        @result.must_be_kind_of WebkitRemote::Client::RemoteObject
+        @result.must_be_kind_of WebkitRemote::Client::JsObject
         @result.js_class_name.must_equal 'TestClass'
         @result.bound_call('TestClass.prototype.toString').
                 must_equal 'hello ruby, rbx and jruby'

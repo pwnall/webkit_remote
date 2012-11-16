@@ -93,4 +93,57 @@ describe WebkitRemote::Client::DomNode do
 DOM_END
     end
   end
+
+  describe 'remove' do
+    before :all do
+      @p = @root.query_selector 'p#load-confirmation'
+      @p.remove
+    end
+
+    it 'removes the node from the DOM tree' do
+      @root.query_selector_all('p').length.must_equal 1
+    end
+  end
+
+  describe 'remove_attribute' do
+    describe 'without cached data' do
+      before :all do
+        @p = @root.query_selector 'p#load-confirmation'
+        @p.remove_attribute 'data-purpose'
+      end
+
+      it 'strips the attribute from the element' do
+        @p.attributes!.wont_include 'data-purpose'
+      end
+    end
+
+    describe 'with cached data' do
+      before :all do
+        @p = @root.query_selector 'p#load-confirmation'
+        @p.attributes
+        @p.remove_attribute 'data-purpose'
+      end
+
+      it 'strips the attribute from the element' do
+        @p.attributes.wont_include 'data-purpose'
+      end
+    end
+  end
+
+  describe 'js_object' do
+    before :all do
+      @p = @root.query_selector 'p#load-confirmation'
+      @js_object = @p.js_object
+    end
+
+    it 'returns the corresponding WebkitRemote::Client::JsObject' do
+      @js_object.must_be_kind_of WebkitRemote::Client::JsObject
+      @js_object.properties['tagName'].value.must_equal 'P'
+      @js_object.properties['baseURI'].value.must_equal fixture_url(:dom)
+    end
+
+    it 'dom_node returns the DomNode back' do
+      @js_object.dom_node.must_equal @p
+    end
+  end
 end
