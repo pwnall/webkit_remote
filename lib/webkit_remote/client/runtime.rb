@@ -299,9 +299,29 @@ class JsObject
       @js_subtype = nil
     end
     @value = raw_object['value']
-    @dom_node = nil
 
     group.add self
+
+    initialize_modules
+  end
+
+  def initialize_modules
+  end
+  private :initialize_modules
+
+  # Registers a module initializer.
+  def self.initializer(name)
+    before_name = :"initialize_modules_before_#{name}"
+    alias_method before_name, :initialize_modules
+    private before_name
+    remove_method :initialize_modules
+    eval <<END_METHOD
+      def initialize_modules
+        #{name}
+        #{before_name.to_s}
+      end
+END_METHOD
+    private :initialize_modules
   end
 
   # Informs this object that it was released as part of a group release.

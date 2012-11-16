@@ -111,6 +111,7 @@ class Client
   def self.initializer(name)
     before_name = :"initialize_modules_before_#{name}"
     alias_method before_name, :initialize_modules
+    private before_name
     remove_method :initialize_modules
     eval <<END_METHOD
       def initialize_modules
@@ -118,12 +119,14 @@ class Client
         #{before_name.to_s}
       end
 END_METHOD
+    private :initialize_modules
   end
 
   # Registers a module clearer.
   def self.clearer(name)
     before_name = :"clear_modules_before_#{name}"
     alias_method before_name, :clear_modules
+    private before_name
     remove_method :clear_modules
     eval <<END_METHOD
       def clear_modules
@@ -131,6 +134,7 @@ END_METHOD
         #{before_name.to_s}
       end
 END_METHOD
+    private :clear_modules
   end
 
   # Called by the constructor. Aliased by the module initializers.
@@ -139,6 +143,7 @@ END_METHOD
   def initialize_modules
     # NOTE: this gets called after all the module initializers complete
   end
+  private :initialize_modules
 
   # Called by clear_all.
   #
@@ -146,6 +151,7 @@ END_METHOD
   def clear_modules
     # NOTE: this gets called after all the module cleaners complete
   end
+  private :clear_modules
 
   # Debugging output.
   def inspect

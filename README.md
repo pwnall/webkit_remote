@@ -30,6 +30,12 @@ have been implemented:
 * Page
 * Remote
 
+This gem will only support officially released remote debugging protocol
+features. If you need to use an unsupported feature, such as CSS debugging,
+take a look at the
+[webkit_remote_unstable](https:://github.com/pwnall/webkit_remote_unstable)
+gem.
+
 
 ## Requirements
 
@@ -217,6 +223,11 @@ closes the debugging connection and shuts down the Google Chrome instance.
 
 
 ## Contributing
+
+Please contribute support for stable features to
+[webkit_remote](https:://github.com/pwnall/webkit_remote) and support for
+unstable features at
+[webkit_remote_unstable](https:://github.com/pwnall/webkit_remote_unstable).
 
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet.
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it.

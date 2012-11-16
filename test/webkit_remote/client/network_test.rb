@@ -10,6 +10,18 @@ describe WebkitRemote::Client::Network do
     @client.close
   end
 
+  describe 'can_clear_cookies?' do
+    it 'returns true in Chrome' do
+      @client.can_clear_cookies?.must_equal true
+    end
+  end
+
+  describe 'can_clear_network_cache?' do
+    it 'returns true in Chrome' do
+      @client.can_clear_network_cache?.must_equal true
+    end
+  end
+
   describe 'without network events enabled' do
     before :all do
       @client.network_events = false

@@ -222,6 +222,27 @@ class DomNode
     @system_id = nil
     @value = nil
     @xml_version = nil
+
+    initialize_modules
+  end
+
+  def initialize_modules
+  end
+  private :initialize_modules
+
+  # Registers a module initializer.
+  def self.initializer(name)
+    before_name = :"initialize_modules_before_#{name}"
+    alias_method before_name, :initialize_modules
+    private before_name
+    remove_method :initialize_modules
+    eval <<END_METHOD
+      def initialize_modules
+        #{name}
+        #{before_name.to_s}
+      end
+END_METHOD
+    private :initialize_modules
   end
 
   # Updates node state to reflect new data from the Webkit debugging server.
@@ -269,27 +290,6 @@ class DomNode
     11 => :document_fragment, 12 => :notation
   }.freeze
 end   # class WebkitRemote::Client::DomNode
-
-class JsObject
-  # @return [WebkitRemote::Client::DomNode] the DOM node wrapped by this
-  #     JavaScript object
-  def dom_node
-    @dom_node ||= dom_node!
-  end
-
-  # Fetches the wrapped DOM node, bypassing the object's cache.
-  #
-  # @return [WebkitRemote::Client::DomNode] the DOM domain object wrapped by
-  #     this JavaScript object
-  def dom_node!
-    result = @client.rpc.call 'DOM.requestNode', objectId: @remote_id
-    @dom_node = if result['nodeId']
-      @client.dom_node result['nodeId']
-    else
-      nil
-    end
-  end
-end  # class WebkitRemote::Client::JsObject
 
 end  # namespace WebkitRemote::Client
 
