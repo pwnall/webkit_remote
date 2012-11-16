@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "webkit_remote"
-  s.version = "0.3.2"
+  s.version = "0.4.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Victor Costan"]
-  s.date = "2012-11-10"
+  s.date = "2012-11-16"
   s.description = "Launches Google Chrome instances and controls them via the Remote Debugging server"
   s.email = "victor@costan.us"
   s.extra_rdoc_files = [
@@ -30,6 +30,8 @@ Gem::Specification.new do |s|
     "lib/webkit_remote/client.rb",
     "lib/webkit_remote/client/console.rb",
     "lib/webkit_remote/client/console_events.rb",
+    "lib/webkit_remote/client/dom.rb",
+    "lib/webkit_remote/client/dom_events.rb",
     "lib/webkit_remote/client/network.rb",
     "lib/webkit_remote/client/network_events.rb",
     "lib/webkit_remote/client/page.rb",
@@ -41,6 +43,7 @@ Gem::Specification.new do |s|
     "lib/webkit_remote/top_level.rb",
     "test/fixtures/config.ru",
     "test/fixtures/html/console.html",
+    "test/fixtures/html/dom.html",
     "test/fixtures/html/load.html",
     "test/fixtures/html/network.html",
     "test/fixtures/html/runtime.html",
@@ -49,10 +52,11 @@ Gem::Specification.new do |s|
     "test/helper.rb",
     "test/webkit_remote/browser_test.rb",
     "test/webkit_remote/client/console_test.rb",
+    "test/webkit_remote/client/dom_test.rb",
+    "test/webkit_remote/client/js_object_group_test.rb",
+    "test/webkit_remote/client/js_object_test.rb",
     "test/webkit_remote/client/network_test.rb",
     "test/webkit_remote/client/page_test.rb",
-    "test/webkit_remote/client/remote_object_group_test.rb",
-    "test/webkit_remote/client/remote_object_test.rb",
     "test/webkit_remote/client/runtime_test.rb",
     "test/webkit_remote/client_test.rb",
     "test/webkit_remote/event_test.rb",
@@ -75,6 +79,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<faye-websocket>, [">= 0.4.6"])
       s.add_runtime_dependency(%q<posix-spawn>, [">= 0.3.6"])
       s.add_development_dependency(%q<bundler>, [">= 1.2.1"])
+      s.add_development_dependency(%q<debugger>, [">= 1.2.1"])
       s.add_development_dependency(%q<jeweler>, [">= 1.8.4"])
       s.add_development_dependency(%q<minitest>, [">= 4.1.0"])
       s.add_development_dependency(%q<puma>, [">= 1.6.3"])
@@ -89,6 +94,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<faye-websocket>, [">= 0.4.6"])
       s.add_dependency(%q<posix-spawn>, [">= 0.3.6"])
       s.add_dependency(%q<bundler>, [">= 1.2.1"])
+      s.add_dependency(%q<debugger>, [">= 1.2.1"])
       s.add_dependency(%q<jeweler>, [">= 1.8.4"])
       s.add_dependency(%q<minitest>, [">= 4.1.0"])
       s.add_dependency(%q<puma>, [">= 1.6.3"])
@@ -104,6 +110,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<faye-websocket>, [">= 0.4.6"])
     s.add_dependency(%q<posix-spawn>, [">= 0.3.6"])
     s.add_dependency(%q<bundler>, [">= 1.2.1"])
+    s.add_dependency(%q<debugger>, [">= 1.2.1"])
     s.add_dependency(%q<jeweler>, [">= 1.8.4"])
     s.add_dependency(%q<minitest>, [">= 4.1.0"])
     s.add_dependency(%q<puma>, [">= 1.6.3"])
