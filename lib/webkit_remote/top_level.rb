@@ -3,6 +3,7 @@ module WebkitRemote
   # Launches a WebKit process locally, and sets up a debugger client for it.
   #
   # @param (see WebkitRemote::Process#initialize)
+  # @option (see WebkitRemote::Process#initialize)
   # @return [WebkitRemote::Client] a debugging client connected to a local
   #     WebKit process; the client will automatically stop the process when
   #     closed
