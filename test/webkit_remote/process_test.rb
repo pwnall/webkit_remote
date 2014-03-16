@@ -51,6 +51,8 @@ describe WebkitRemote::Process do
             pass
           rescue Errno::ECONNRESET
             pass
+          rescue Errno::ECONNREFUSED
+            pass
           end
         end
       end
@@ -95,6 +97,8 @@ describe WebkitRemote::Process do
           rescue EOFError
             pass
           rescue Errno::ECONNRESET
+            pass
+          rescue Errno::ECONNREFUSED
             pass
           end
         end

@@ -104,55 +104,6 @@ class NetworkCacheHit < WebkitRemote::Event
   end
 end  # class WebkitRemote::Event::NetworkCacheHit
 
-# Emitted when a resource is served from the local cache.
-class NetworkMemoryCacheHit < WebkitRemote::Event
-  register 'Network.requestServedFromMemoryCache'
-
-  # @return [WebkitRemote::Client::NetworkResource] information about the
-  #     resource fetched by this network operation
-  attr_reader :resource
-
-  # @return [WebkitRemote::Client::NetworkCacheEntry] cached information used
-  #     to produce the resource
-  attr_reader :cache_data
-
-  # @return [String] the URL of the document that caused this network request
-  attr_reader :document_url
-
-  # @return [WebkitRemote::Client::NetworkRequestInitiator] cause for this
-  #     network request
-  attr_reader :initiator
-
-  # @return [Number] the event timestamp
-  attr_reader :timestamp
-
-  # @private Use Event#for instead of calling this constructor directly.
-  def initialize(rpc_event, client)
-    super
-
-    if raw_data['resource']
-      @cache_data = WebkitRemote::Client::NetworkCacheEntry.new(
-          raw_data['resource'])
-    end
-    @document_url = raw_data['documentURL']
-    if raw_data['initiator']
-      @initiator = WebkitRemote::Client::NetworkRequestInitiator.new(
-          raw_data['initiator'])
-    end
-    @loader_id = raw_data['loaderId']
-    @timestamp = raw_data['timestamp']
-
-    @resource = client.network_resource raw_data['requestId']
-    @resource.set_document_url @document_url
-    @resource.set_initiator @initiator
-    if @cache_data
-      @resource.set_response @cache_data.response
-      @resource.set_type @cache_data.type
-    end
-    @resource.add_event self
-  end
-end  # class WebkitRemote::Event::NetworkMemoryCacheHit
-
 # Emitted right before a network request.
 class NetworkRequest < WebkitRemote::Event
   register 'Network.requestWillBeSent'

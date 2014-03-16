@@ -1,7 +1,5 @@
-require 'eventmachine'
-require 'faye/websocket'
 require 'json'
-require 'thread'
+require 'ws_sync_client'
 
 module WebkitRemote
 
@@ -17,21 +15,17 @@ class Rpc
       raise ArgumentError, 'Target tab not specified'
     end
     @closed = false
-    @send_queue = EventMachine::Queue.new
-    @recv_queue = Queue.new
     @next_id = 2
     @events = []
 
-    self.class.em_start
     @debug_url = tab.debug_url
-    @web_socket = Faye::WebSocket::Client.new @debug_url
-    setup_web_socket
+    @web_socket = WsSyncClient.new @debug_url
   end
 
   # Remote debugging RPC call.
   #
   # See the following URL for implemented calls.
-  #     https://developers.google.com/chrome-developer-tools/docs/protocol/1.0/index
+  #     https://developers.google.com/chrome-developer-tools/docs/protocol/1.1/index
   #
   # @param [String] method name of the RPC method to be invoked
   # @param [Hash<String, Object>, nil] params parameters for the RPC method to
@@ -47,7 +41,7 @@ class Rpc
     }
     request[:params] = params if params
     request_json = JSON.dump request
-    @send_queue.push request_json
+    @web_socket.send_frame request_json
 
     loop do
       result = receive_message request_id
@@ -83,7 +77,6 @@ class Rpc
     @closed = true
     @web_socket.close
     @web_socket = nil
-    self.class.em_stop
     self
   end
 
@@ -95,39 +88,6 @@ class Rpc
   # @return [String] points to this client's Webkit remote debugging server
   attr_reader :debug_url
 
-  # Hooks up the event handlers of the WebSocket client.
-  def setup_web_socket
-    @web_socket.onopen = lambda do |event|
-      send_request
-      @web_socket.onmessage = lambda do |event|
-        data = event.data
-        EventMachine.defer do
-          @recv_queue.push data
-        end
-      end
-      @web_socket.onclose = lambda do |event|
-        code = event.code
-        EventMachine.defer do
-          @recv_queue.push code
-        end
-      end
-    end
-  end
-  private :setup_web_socket
-
-  # One iteration of the request sending loop.
-  #
-  # RPC requests are JSON-serialized on the sending thread, then pushed into
-  # the send queue, which is an EventMachine queue. On the reactor thread, the
-  # serialized message is sent as a WebSocket frame.
-  def send_request
-    @send_queue.pop do |json|
-      @web_socket.send json
-      send_request
-    end
-  end
-  private :send_request
-
   # Blocks until a WebKit message is received, then parses it.
   #
   # RPC notifications are added to the @events array.
@@ -137,11 +97,7 @@ class Rpc
   # @return [Hash<String, Object>, nil] a Hash containing the RPC result if an
   #     expected RPC response was received; nil if an RPC notice was received
   def receive_message(expected_id)
-    json = @recv_queue.pop
-    unless json.respond_to? :to_str
-      close
-      raise RuntimeError, 'The Webkit debugging server closed the WebSocket'
-    end
+    json = @web_socket.recv_frame
     begin
       data = JSON.parse json
     rescue JSONError
@@ -169,41 +125,6 @@ class Rpc
     end
   end
   private :receive_message
-
-  # Sets up an EventMachine reactor if necessary.
-  def self.em_start
-    @em_start_lock.synchronize do
-      if @em_clients == 0 and @em_thread.nil?
-        em_ready = ConditionVariable.new
-        @em_thread = Thread.new do
-          EventMachine.run do
-            @em_start_lock.synchronize { em_ready.signal }
-          end
-        end
-        em_ready.wait @em_start_lock
-      end
-      @em_clients += 1
-    end
-  end
-  @em_clients = 0
-  @em_start_lock = Mutex.new
-  @em_thread = nil
-
-  # Shuts down an EventMachine reactor if necessary.
-  def self.em_stop
-    @em_start_lock.synchronize do
-      @em_clients -= 1
-      if @em_clients == 0
-        if @em_thread
-          EventMachine.stop_event_loop
-          # HACK(pwnall): having these in slows down the code a lot
-          # EventMachine.reactor_thread.join
-          # @em_thread.join
-        end
-        @em_thread = nil
-      end
-    end
-  end
 end  # class WebkitRemote::Rpc
 
-end  # namespace webkitRemote
+end  # namespace WebkitRemote

@@ -28,12 +28,25 @@ class Process
     @data_dir = Dir.mktmpdir 'webkit-remote'
     @pid = nil
     @xvfb_pid = nil
-    @cli = chrome_cli opts
+    if opts[:window]
+      @window = opts[:window]
+    else
+      @window = { }
+    end
     if opts[:xvfb]
       @xvfb_cli = xvfb_cli opts
+      if opts[:xvfb].respond_to? :[]
+        @window[:width] ||= opts[:xvfb][:width]
+        @window[:height] ||= opts[:xvfb][:height]
+      end
     else
       @xvfb_cli = nil
     end
+    @window[:top] ||= 0
+    @window[:left] ||= 0
+    @window[:width] ||= 256
+    @window[:height] ||= 256
+    @cli = chrome_cli opts
   end
 
   # Starts the browser process.
@@ -52,7 +65,7 @@ class Process
     end
 
     unless @pid = POSIX::Spawn.spawn(*@cli)
-      # The launch failed
+      # The launch failed.
       stop
       return nil
     end
@@ -135,20 +148,21 @@ class Process
     [
       chrome_env(opts),
       self.class.chrome_binary,
+      '--bwsi',  # disable extensions, sync, bookmarks
       '--disable-default-apps',  # no bundled apps
-      '--disable-desktop-shortcuts',  # don't mess with the desktop
       '--disable-extensions',  # no extensions
-      '--disable-internal-flash',  # no plugins
       '--disable-java',  # no plugins
       '--disable-logging',  # don't trash stdout / stderr
       '--disable-plugins',  # no native content
       '--disable-prompt-on-repost',   # no confirmation dialog on POST refresh
       '--disable-sync',  # no talking with the Google servers
+      '--disable-translate',  # no Google Translate calls
       '--incognito',  # don't use old state, don't preserve state
       '--homepage=about:blank',  # don't go to Google in new tabs
       '--keep-alive-for-test',  # don't kill process if the last window dies
       '--lang=en-US',  # set a default language
       '--log-level=3',  # FATAL, because there's no setting for "none"
+      '--mute-audio',  # don't let the computer make noise
       '--no-default-browser-check',  # don't hang when Chrome isn't default
       '--no-experiments',  # not sure this is useful
       '--no-first-run',  # don't show the help UI
@@ -158,8 +172,9 @@ class Process
       '--noerrdialogs',  # don't hang on error dialogs
       "--remote-debugging-port=#{@port}",  # Webkit remote debugging
       "--user-data-dir=#{@data_dir}",  # really ensure a clean slate
-      '--window-position=0,0',  # remove randomness source
-      '--window-size=256,256',  # remove randomness source
+      "--window-position=#{@window[:left]},#{@window[:top]}",  # randomness--
+      "--window-size=#{@window[:width]},#{@window[:height]}",  # randomness--
+
       'about:blank',  # don't load the homepage
       {
         chdir: @data_dir,

@@ -1,12 +1,12 @@
 require File.expand_path('../../helper.rb', File.dirname(__FILE__))
 
 describe WebkitRemote::Client::Network do
-  before :all do
+  before :each do
     @client = WebkitRemote.local port: 9669
     @client.console_events = true
     @client.disable_cache = true
   end
-  after :all do
+  after :each do
     @client.close
   end
 
@@ -23,11 +23,11 @@ describe WebkitRemote::Client::Network do
   end
 
   describe 'without network events enabled' do
-    before :all do
+    before :each do
       @client.network_events = false
       @client.navigate_to fixture_url(:network)
       @events = @client.wait_for type: WebkitRemote::Event::ConsoleMessage,
-                                 level: :log
+                                 level: :log, text: 'Test done'
     end
 
     it 'does not receive any network event' do
@@ -47,12 +47,12 @@ describe WebkitRemote::Client::Network do
   end
 
   describe 'with network events enabled' do
-    before :all do
+    before :each do
       @client.disable_cache = true
       @client.network_events = true
       @client.navigate_to fixture_url(:network)
       @events = @client.wait_for type: WebkitRemote::Event::ConsoleMessage,
-                                 level: :log
+                                 level: :log, text: 'Test done'
       @requests = @events.select do |event|
         event.kind_of? WebkitRemote::Event::NetworkRequest
       end
@@ -65,7 +65,7 @@ describe WebkitRemote::Client::Network do
       @chunks = @events.select do |event|
         event.kind_of? WebkitRemote::Event::NetworkData
       end
-      @failures = @events.select do |event|
+      @failure_events = @events.select do |event|
         event.kind_of? WebkitRemote::Event::NetworkFailure
       end
       @resources = @client.network_resources
@@ -125,7 +125,7 @@ describe WebkitRemote::Client::Network do
     it 'parses the initial response inside a NetworkResponse event' do
       @responses[0].type.must_equal :document
       @responses[0].response.
-                   must_be_kind_of WebkitRemote::Client::NetworkResponse
+                    must_be_kind_of WebkitRemote::Client::NetworkResponse
       @responses[0].response.url.must_equal fixture_url(:network)
       @responses[0].response.status.must_equal 200
       @responses[0].response.status_text.must_equal 'OK'
@@ -133,8 +133,8 @@ describe WebkitRemote::Client::Network do
       @responses[0].response.headers['X-Unit-Test'].must_equal 'webkit-remote'
       @responses[0].response.mime_type.must_equal 'text/html'
       @responses[0].response.request_headers.must_include 'User-Agent'
-      @responses[0].response.request_headers['User-Agent']
-                   .must_match(/webkit/i)
+      @responses[0].response.request_headers['User-Agent'].
+                    must_match(/webkit/i)
       @responses[0].response.from_cache.must_equal false
       @responses[0].response.connection_reused.must_equal false
     end
@@ -142,7 +142,7 @@ describe WebkitRemote::Client::Network do
     it 'parses a 404 response inside a NetworkResponse event' do
       @responses[1].type.must_equal :script
       @responses[1].response.
-                   must_be_kind_of WebkitRemote::Client::NetworkResponse
+                    must_be_kind_of WebkitRemote::Client::NetworkResponse
       @responses[1].response.url.
                     must_equal fixture_url(:network_not_found, :js)
       @responses[1].response.status.must_equal 404
@@ -151,8 +151,8 @@ describe WebkitRemote::Client::Network do
       @responses[1].response.headers['X-Unit-Test'].must_equal 'webkit-remote'
       @responses[1].response.mime_type.must_equal 'text/plain'
       @responses[1].response.request_headers.must_include 'User-Agent'
-      @responses[1].response.request_headers['User-Agent']
-                   .must_match(/webkit/i)
+      @responses[1].response.request_headers['User-Agent'].
+                    must_match(/webkit/i)
       @responses[1].response.from_cache.must_equal false
     end
 
@@ -183,13 +183,13 @@ describe WebkitRemote::Client::Network do
     end
 
     it 'receives NetworkFailure events' do
-      @failures.wont_be :empty?
+      @failure_events.wont_be :empty?
     end
 
     it 'parses NetworkFailure events' do
-      @failures[0].resource.must_equal @requests[1].resource
-      @failures[0].error.wont_equal nil
-      @failures[0].canceled.must_equal true
+      @failure_events[0].resource.must_equal @requests[1].resource
+      @failure_events[0].error.wont_equal nil
+      @failure_events[0].canceled.must_equal true
     end
 
     it 'collects request and response data in NetworkResources' do
@@ -200,8 +200,8 @@ describe WebkitRemote::Client::Network do
       @resources[1].document_url.must_equal fixture_url(:network)
       @resources[1].initiator.must_equal @requests[1].initiator
       @resources[1].canceled.must_equal true
-      @resources[1].error.must_equal @failures[0].error
-      @resources[1].last_event.must_equal @failures[0]
+      @resources[1].error.must_equal @failure_events[0].error
+      @resources[1].last_event.must_equal @failure_events[0]
       @resources[1].client.must_equal @client
 
       @resources[2].must_equal @requests[2].resource
@@ -215,7 +215,7 @@ describe WebkitRemote::Client::Network do
       @resources[2].last_event.must_equal @loads[1]
       @resources[2].client.must_equal @client
 
-      @resources[-1].last_event.must_equal @chunks[-1]
+      @resources[-1].last_event.must_equal @loads[-1]
     end
 
     it 'retrieves the body for a text NetworkResource' do
@@ -229,16 +229,17 @@ describe WebkitRemote::Client::Network do
   end
 
   describe 'and a cached request' do
-    before :all do
+    before :each do
       @client.disable_cache = false
       @client.navigate_to fixture_url(:network)
-      @client.wait_for type: WebkitRemote::Event::ConsoleMessage, level: :log
+      @client.wait_for type: WebkitRemote::Event::ConsoleMessage, level: :log,
+                       text: 'Test done'
       @client.clear_all
 
       @client.network_events = true
       @client.navigate_to fixture_url(:network)
       @events = @client.wait_for type: WebkitRemote::Event::ConsoleMessage,
-                                 level: :log
+                                 level: :log, text: 'Test done'
       @requests = @events.select do |event|
         event.kind_of? WebkitRemote::Event::NetworkRequest
       end
@@ -254,9 +255,6 @@ describe WebkitRemote::Client::Network do
       @hits = @events.select do |event|
         event.kind_of? WebkitRemote::Event::NetworkCacheHit
       end
-      @memory_hits = @events.select do |event|
-        event.kind_of? WebkitRemote::Event::NetworkMemoryCacheHit
-      end
 
       @resources = @client.network_resources
     end
@@ -267,11 +265,6 @@ describe WebkitRemote::Client::Network do
 
     it 'parses NetworkCacheHits events' do
       @hits[0].resource.must_equal @requests[2].resource
-    end
-
-    it 'receives NetworkMemoryCacheHit events' do
-      skip 'waiting for http://crbug.com/160404'
-      @memory_hits.wont_be :empty?
     end
   end
 end

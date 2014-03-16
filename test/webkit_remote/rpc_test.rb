@@ -17,7 +17,7 @@ describe WebkitRemote::Rpc do
   describe 'call' do
     before do
       @result = @rpc.call 'Runtime.evaluate', expression: '1 + 2',
-                                                returnByValue: true
+                                              returnByValue: true
     end
 
     it 'produces the correct result' do

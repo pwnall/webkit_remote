@@ -24,10 +24,10 @@ describe WebkitRemote::Event do
 
     describe 'matches' do
       it 'handles single conditions' do
-        @event.matches?(:class => WebkitRemote::Event::PageLoaded).
+        @event.matches?(class: WebkitRemote::Event::PageLoaded).
                must_equal true
         @event.matches?(type: WebkitRemote::Event).must_equal true
-        @event.matches?(:class => WebkitRemote::Event::PageDomReady).
+        @event.matches?(class: WebkitRemote::Event::PageDomReady).
                must_equal false
         @event.matches?(name: 'Page.loadEventFired').must_equal true
         @event.matches?(name: 'loadEventFired').must_equal false

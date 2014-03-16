@@ -66,6 +66,10 @@ class Browser
       debug_url = json_tab['webSocketDebuggerUrl']
       Tab.new self, debug_url, title: title, url: url
     end
+    # HACK(pwnall): work around the nasty Google Hangouts integration
+    tabs.select do |tab|
+      tab.url != 'chrome-extension://nkeimhogjdpnpccoofpliimaahmaaome/background.html'
+    end
   end
 
   # @return [Boolean] if true, a WebkitRemote::Process will be stopped when

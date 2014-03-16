@@ -37,21 +37,6 @@ describe WebkitRemote::Client::JsObject do
                 keys.sort.must_equal ['answer', 'test']
       end
 
-      it 'recognizes writable properties' do
-        @object.properties['answer'].writable?.must_equal true
-        @object.properties['constructor'].writable?.must_equal false
-      end
-
-      it 'recognizes configurable properties' do
-        @object.properties['answer'].configurable?.must_equal true
-        @object.properties['constructor'].configurable?.must_equal false
-      end
-
-      it 'recognizes enumerable properties' do
-        @object.properties['answer'].enumerable?.must_equal true
-        @object.properties['constructor'].enumerable?.must_equal false
-      end
-
       describe 'after property update' do
         before do
           @object.properties['DONE']
@@ -73,15 +58,52 @@ describe WebkitRemote::Client::JsObject do
       end
     end
 
-    describe 'with the XMHttpRequest built-in' do
+    describe 'with an object with custom properties' do
       before :each do
-        @object = @client.remote_eval 'XMLHttpRequest'
+        @object = @client.remote_eval <<JS_END
+(function() {
+  var o = new Object();
+  Object.defineProperty(o, 'hidden', {
+    enumerable: false, configurable: true,
+    get: function() { return 'hidden'; },
+    set: function(newValue) { }
+  });
+  Object.defineProperty(o, 'readOnly', {
+    enumerable: true, configurable: true,
+    get: function() { return 'hidden'; }
+  });
+  Object.defineProperty(o, 'writable', {
+    enumerable: true, configurable: true, writable: true,
+    value: 42
+  });
+  Object.defineProperty(o, 'fixed', {
+    enumerable: true, configurable: false,
+    get: function() { return 'hidden'; },
+    set: function(newValue) { }
+  });
+  return o;
+})();
+JS_END
       end
 
-      it 'recognizes configurable, non-writable, enumerable properties' do
-        @object.properties['DONE'].configurable?.must_equal true
-        @object.properties['DONE'].writable?.must_equal false
-        @object.properties['DONE'].enumerable?.must_equal true
+      it 'recognizes non-writable properties' do
+        @object.properties['readOnly'].writable?.must_equal false
+        @object.properties['readOnly'].configurable?.must_equal true
+        @object.properties['readOnly'].enumerable?.must_equal true
+
+        @object.properties['writable'].writable?.must_equal true
+        @object.properties['writable'].configurable?.must_equal true
+        @object.properties['writable'].enumerable?.must_equal true
+      end
+
+      it 'recognizes non-enumerable properties' do
+        @object.properties['hidden'].configurable?.must_equal true
+        @object.properties['hidden'].enumerable?.must_equal false
+      end
+
+      it 'recognizes non-configurable properties' do
+        @object.properties['fixed'].configurable?.must_equal false
+        @object.properties['fixed'].enumerable?.must_equal true
       end
     end
   end
