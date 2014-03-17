@@ -215,6 +215,17 @@ describe WebkitRemote::Client::Network do
       @resources[2].last_event.must_equal @loads[1]
       @resources[2].client.must_equal @client
 
+      @resources[3].must_equal @requests[3].resource
+      @resources[3].request.must_equal @requests[3].request
+      @resources[3].response.must_equal @responses[3].response
+      @resources[3].type.must_equal :xhr
+      @resources[3].document_url.must_equal fixture_url(:network)
+      @resources[3].initiator.must_equal @requests[3].initiator
+      @resources[3].canceled.must_equal false
+      @resources[3].error.must_equal nil
+      @resources[3].last_event.must_equal @loads[2]
+      @resources[3].client.must_equal @client
+
       @resources[-1].last_event.must_equal @loads[-1]
     end
 
@@ -224,7 +235,7 @@ describe WebkitRemote::Client::Network do
 
     it 'retrieves the body for a binary NetworkResource' do
       skip 'waiting for http://crbug.com/160397'
-      @resources[2].body.must_equal File.binread(fixture_path(:network, :png))
+      @resources[3].body.must_equal File.binread(fixture_path(:network, :png))
     end
   end
 

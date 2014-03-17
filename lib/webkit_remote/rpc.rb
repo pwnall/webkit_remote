@@ -111,7 +111,9 @@ class Rpc
         raise RuntimeError, 'Out of sequence RPC response id'
       end
       if data['error']
-        raise RuntimeError, "Error #{data['error']['code']}"
+        code = data['error']['code']
+        message = data['error']['message']
+        raise RuntimeError, "RPC Error #{code}: #{message}"
       end
       return data['result']
     elsif data['method']
