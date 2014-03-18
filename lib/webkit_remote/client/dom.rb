@@ -28,7 +28,7 @@ module Dom
 
   # Looks up cached information about a DOM node.
   #
-  # @private Use WebkitRemote::Client::Dom#querySelector or the other public
+  # @private Use WebkitRemote::Client::Dom#query_selector or the other public
   #     APIs instead of calling this directly
   #
   # @param [String] remote_id value of the nodeId attribute in the JSON
@@ -139,11 +139,14 @@ class DomNode
   #
   # @param [String] css_selector the CSS selector that must be matched by the
   #     returned node
-  # @return [WebkitRemote::Client::DomNode] DOM nodes in this node's subtree
-  #     that match the given selector
+  # @return [WebkitRemote::Client::DomNode] the first DOM node in this node's
+  #     subtree that matches the given selector; if no such node exists, nil is
+  #     returned
   def query_selector(css_selector)
     result = @client.rpc.call 'DOM.querySelector', nodeId: @remote_id,
                               selector: css_selector
+    node_id = result['nodeId']
+    return nil if node_id == 0
     @client.dom_node result['nodeId']
   end
 

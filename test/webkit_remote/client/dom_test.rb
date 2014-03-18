@@ -38,18 +38,27 @@ describe WebkitRemote::Client::DomNode do
   end
 
   describe 'querySelector' do
-    before :all do
-      @p = @root.query_selector 'p#load-confirmation'
+    describe 'with a selector that matches' do
+      before :all do
+        @p = @root.query_selector 'p#load-confirmation'
+      end
+
+      it 'returns a WebkitRemote::Client::DomNode' do
+        @p.must_be_kind_of WebkitRemote::Client::DomNode
+      end
+
+      it 'returns a WebkitRemote::Client::DomNode with correct attributes' do
+        skip 'On-demand node processing not implemented'
+        @p.node_type.must_equal :element
+        @p.name.must_equal 'P'
+      end
     end
 
-    it 'returns a WebkitRemote::Client::DomNode' do
-      @p.must_be_kind_of WebkitRemote::Client::DomNode
-    end
-
-    it 'returns a WebkitRemote::Client::DomNode with correct attributes' do
-      skip 'On-demand node processing not implemented'
-      @p.node_type.must_equal :element
-      @p.name.must_equal 'P'
+    describe 'with a selector that does not match' do
+      it 'returns nil' do
+        node = @root.query_selector '#this-id-should-not-exist'
+        node.must_equal nil
+      end
     end
   end
 
