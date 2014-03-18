@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "webkit_remote"
-  s.version = "0.4.1"
+  s.version = "0.5.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Victor Costan"]
-  s.date = "2012-11-16"
+  s.date = "2014-03-18"
   s.description = "Launches Google Chrome instances and controls them via the Remote Debugging server"
   s.email = "victor@costan.us"
   s.extra_rdoc_files = [
@@ -69,58 +69,52 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/pwnall/webkit_remote"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.24"
+  s.rubygems_version = "2.0.14"
   s.summary = "Client for the Webkit Remote Debugging server"
 
   if s.respond_to? :specification_version then
-    s.specification_version = 3
+    s.specification_version = 4
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<eventmachine>, [">= 1.0.0"])
-      s.add_runtime_dependency(%q<faye-websocket>, [">= 0.4.6"])
-      s.add_runtime_dependency(%q<posix-spawn>, [">= 0.3.6"])
-      s.add_development_dependency(%q<bundler>, [">= 1.2.1"])
-      s.add_development_dependency(%q<debugger>, [">= 1.2.1"])
-      s.add_development_dependency(%q<jeweler>, [">= 1.8.4"])
-      s.add_development_dependency(%q<minitest>, [">= 4.1.0"])
-      s.add_development_dependency(%q<puma>, [">= 1.6.3"])
-      s.add_development_dependency(%q<rack>, [">= 1.4.1"])
+      s.add_runtime_dependency(%q<ws_sync_client>, [">= 0.1.1"])
+      s.add_runtime_dependency(%q<posix-spawn>, [">= 0.3.8"])
+      s.add_development_dependency(%q<bundler>, [">= 1.5.3"])
+      s.add_development_dependency(%q<debugger>, [">= 1.6.6"])
+      s.add_development_dependency(%q<jeweler>, [">= 2.0.1"])
+      s.add_development_dependency(%q<minitest>, [">= 5.3.0"])
+      s.add_development_dependency(%q<puma>, [">= 2.8.0"])
+      s.add_development_dependency(%q<rack>, [">= 1.5.2"])
       s.add_development_dependency(%q<rack-contrib>, [">= 1.1.0"])
-      s.add_development_dependency(%q<rdoc>, [">= 3.12"])
-      s.add_development_dependency(%q<ruby-prof>, [">= 0.11.2"])
-      s.add_development_dependency(%q<simplecov>, [">= 0.7.1"])
-      s.add_development_dependency(%q<yard>, [">= 0.8.3"])
+      s.add_development_dependency(%q<rdoc>, [">= 4.1.1"])
+      s.add_development_dependency(%q<simplecov>, [">= 0.8.2"])
+      s.add_development_dependency(%q<yard>, [">= 0.8.7.3"])
     else
-      s.add_dependency(%q<eventmachine>, [">= 1.0.0"])
-      s.add_dependency(%q<faye-websocket>, [">= 0.4.6"])
-      s.add_dependency(%q<posix-spawn>, [">= 0.3.6"])
-      s.add_dependency(%q<bundler>, [">= 1.2.1"])
-      s.add_dependency(%q<debugger>, [">= 1.2.1"])
-      s.add_dependency(%q<jeweler>, [">= 1.8.4"])
-      s.add_dependency(%q<minitest>, [">= 4.1.0"])
-      s.add_dependency(%q<puma>, [">= 1.6.3"])
-      s.add_dependency(%q<rack>, [">= 1.4.1"])
+      s.add_dependency(%q<ws_sync_client>, [">= 0.1.1"])
+      s.add_dependency(%q<posix-spawn>, [">= 0.3.8"])
+      s.add_dependency(%q<bundler>, [">= 1.5.3"])
+      s.add_dependency(%q<debugger>, [">= 1.6.6"])
+      s.add_dependency(%q<jeweler>, [">= 2.0.1"])
+      s.add_dependency(%q<minitest>, [">= 5.3.0"])
+      s.add_dependency(%q<puma>, [">= 2.8.0"])
+      s.add_dependency(%q<rack>, [">= 1.5.2"])
       s.add_dependency(%q<rack-contrib>, [">= 1.1.0"])
-      s.add_dependency(%q<rdoc>, [">= 3.12"])
-      s.add_dependency(%q<ruby-prof>, [">= 0.11.2"])
-      s.add_dependency(%q<simplecov>, [">= 0.7.1"])
-      s.add_dependency(%q<yard>, [">= 0.8.3"])
+      s.add_dependency(%q<rdoc>, [">= 4.1.1"])
+      s.add_dependency(%q<simplecov>, [">= 0.8.2"])
+      s.add_dependency(%q<yard>, [">= 0.8.7.3"])
     end
   else
-    s.add_dependency(%q<eventmachine>, [">= 1.0.0"])
-    s.add_dependency(%q<faye-websocket>, [">= 0.4.6"])
-    s.add_dependency(%q<posix-spawn>, [">= 0.3.6"])
-    s.add_dependency(%q<bundler>, [">= 1.2.1"])
-    s.add_dependency(%q<debugger>, [">= 1.2.1"])
-    s.add_dependency(%q<jeweler>, [">= 1.8.4"])
-    s.add_dependency(%q<minitest>, [">= 4.1.0"])
-    s.add_dependency(%q<puma>, [">= 1.6.3"])
-    s.add_dependency(%q<rack>, [">= 1.4.1"])
+    s.add_dependency(%q<ws_sync_client>, [">= 0.1.1"])
+    s.add_dependency(%q<posix-spawn>, [">= 0.3.8"])
+    s.add_dependency(%q<bundler>, [">= 1.5.3"])
+    s.add_dependency(%q<debugger>, [">= 1.6.6"])
+    s.add_dependency(%q<jeweler>, [">= 2.0.1"])
+    s.add_dependency(%q<minitest>, [">= 5.3.0"])
+    s.add_dependency(%q<puma>, [">= 2.8.0"])
+    s.add_dependency(%q<rack>, [">= 1.5.2"])
     s.add_dependency(%q<rack-contrib>, [">= 1.1.0"])
-    s.add_dependency(%q<rdoc>, [">= 3.12"])
-    s.add_dependency(%q<ruby-prof>, [">= 0.11.2"])
-    s.add_dependency(%q<simplecov>, [">= 0.7.1"])
-    s.add_dependency(%q<yard>, [">= 0.8.3"])
+    s.add_dependency(%q<rdoc>, [">= 4.1.1"])
+    s.add_dependency(%q<simplecov>, [">= 0.8.2"])
+    s.add_dependency(%q<yard>, [">= 0.8.7.3"])
   end
 end
 
