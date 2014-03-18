@@ -83,6 +83,11 @@ describe WebkitRemote::Client::Runtime do
       it 'is idempotent' do
         @undefined.must_equal @client.remote_eval('(function(){})()')
       end
+
+      it 'returns a JSObject-like object' do
+        @undefined.released?.must_equal true
+        @undefined.release.must_equal @undefined
+      end
     end
 
     describe 'for an object created via new' do

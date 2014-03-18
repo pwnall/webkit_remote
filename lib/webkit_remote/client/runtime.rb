@@ -127,6 +127,14 @@ class UndefinedClass
   def inspect
     'JavaScript undefined'
   end
+
+  def release
+    self
+  end
+
+  def released?
+    true
+  end
 end  # class WebkitRemote::Client::UndefinedClass
 
 Undefined = UndefinedClass.new
