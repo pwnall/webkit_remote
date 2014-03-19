@@ -21,6 +21,9 @@ class Process
   #     real screen; set the :display, :width, :height, :depth and :dpi of the
   #     server, or use the default display number 20, at 1280x1024x32 with
   #     72dpi
+  # @option opts [Boolean] allow_popups when true, the popup blocker is
+  #     disabled; this is sometimes necessary when driving a Web UI via
+  #     JavaScript
   def initialize(opts = {})
     @port = opts[:port] || 9292
     @timeout = opts[:timeout] || 10
@@ -148,6 +151,28 @@ class Process
     [
       chrome_env(opts),
       self.class.chrome_binary,
+    ] + chrome_cli_flags(opts) + [
+      "--remote-debugging-port=#{@port}",  # Webkit remote debugging
+      "--user-data-dir=#{@data_dir}",  # really ensure a clean slate
+      "--window-position=#{@window[:left]},#{@window[:top]}",
+      "--window-size=#{@window[:width]},#{@window[:height]}",
+
+      'about:blank',  # don't load the homepage
+      {
+        chdir: @data_dir,
+        in: '/dev/null',
+        out: File.join(@data_dir, '.stdout'),
+        err: File.join(@data_dir, '.stderr')
+      },
+    ]
+  end
+
+  # Flags used on the command-line that launches Google Chrome / Chromium.
+  #
+  # @param [Hash] opts options passed to the WebkitRemote::Process constructor
+  # @return [Array<String>] flags used on the command line for launching Chrome
+  def chrome_cli_flags(opts)
+    flags = [
       '--bwsi',  # disable extensions, sync, bookmarks
       '--disable-default-apps',  # no bundled apps
       '--disable-extensions',  # no extensions
@@ -170,19 +195,9 @@ class Process
       '--no-message-box',  # don't let user scripts show dialogs
       '--no-service-autorun',  # don't mess with autorun settings
       '--noerrdialogs',  # don't hang on error dialogs
-      "--remote-debugging-port=#{@port}",  # Webkit remote debugging
-      "--user-data-dir=#{@data_dir}",  # really ensure a clean slate
-      "--window-position=#{@window[:left]},#{@window[:top]}",  # randomness--
-      "--window-size=#{@window[:width]},#{@window[:height]}",  # randomness--
-
-      'about:blank',  # don't load the homepage
-      {
-        chdir: @data_dir,
-        in: '/dev/null',
-        out: File.join(@data_dir, '.stdout'),
-        err: File.join(@data_dir, '.stderr')
-      },
     ]
+    flags << '--disable-popup-blocking' if opts[:allow_popups]
+    flags
   end
 
   # Environment variables set when launching Chrome.

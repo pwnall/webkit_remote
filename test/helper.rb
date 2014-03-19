@@ -50,7 +50,6 @@ class MiniTest::Test
   include RunPumaInMinitest
 end
 
-#class MiniTest::Test
 class MiniTest::Test
   # URL for a file in the test/fixtures directory.
   def fixture_url(name, type = :html)
