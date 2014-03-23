@@ -105,4 +105,23 @@ describe WebkitRemote::Process do
       end
     end
   end
+
+  describe 'with invalid chrome_binary path' do
+    before :each do
+      @process = WebkitRemote::Process.new port: 9669,
+          chrome_binary: '/bin/non_existing_binary'
+    end
+    after :each do
+      @process.stop if @process
+    end
+
+    it 'raises an exception' do
+      begin
+        @process.start
+        fail 'no exception raised'
+      rescue SystemCallError => e
+        e.message.must_match(/non_existing_binary/)
+      end
+    end
+  end
 end

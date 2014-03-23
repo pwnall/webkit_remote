@@ -24,6 +24,8 @@ class Process
   # @option opts [Boolean] allow_popups when true, the popup blocker is
   #     disabled; this is sometimes necessary when driving a Web UI via
   #     JavaScript
+  # @option opts [String] chrome_binary path to the Chrome binary to be used;
+  #     by default, the path is automatically detected
   def initialize(opts = {})
     @port = opts[:port] || 9292
     @timeout = opts[:timeout] || 10
@@ -150,7 +152,7 @@ class Process
     #     http://peter.sh/experiments/chromium-command-line-switches/
     [
       chrome_env(opts),
-      self.class.chrome_binary,
+      opts[:chrome_binary] || self.class.chrome_binary,
     ] + chrome_cli_flags(opts) + [
       "--remote-debugging-port=#{@port}",  # Webkit remote debugging
       "--user-data-dir=#{@data_dir}",  # really ensure a clean slate
