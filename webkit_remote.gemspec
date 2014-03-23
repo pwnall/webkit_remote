@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "webkit_remote"
-  s.version = "0.5.3"
+  s.version = "0.5.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Victor Costan"]
-  s.date = "2014-03-19"
+  s.date = "2014-03-23"
   s.description = "Launches Google Chrome instances and controls them via the Remote Debugging server"
   s.email = "victor@costan.us"
   s.extra_rdoc_files = [
@@ -33,6 +33,7 @@ Gem::Specification.new do |s|
     "lib/webkit_remote/client/dom.rb",
     "lib/webkit_remote/client/dom_events.rb",
     "lib/webkit_remote/client/dom_runtime.rb",
+    "lib/webkit_remote/client/input.rb",
     "lib/webkit_remote/client/network.rb",
     "lib/webkit_remote/client/network_events.rb",
     "lib/webkit_remote/client/page.rb",
@@ -45,6 +46,7 @@ Gem::Specification.new do |s|
     "test/fixtures/config.ru",
     "test/fixtures/html/console.html",
     "test/fixtures/html/dom.html",
+    "test/fixtures/html/input.html",
     "test/fixtures/html/load.html",
     "test/fixtures/html/network.html",
     "test/fixtures/html/popup.html",
@@ -56,6 +58,7 @@ Gem::Specification.new do |s|
     "test/webkit_remote/browser_test.rb",
     "test/webkit_remote/client/console_test.rb",
     "test/webkit_remote/client/dom_test.rb",
+    "test/webkit_remote/client/input_test.rb",
     "test/webkit_remote/client/js_object_group_test.rb",
     "test/webkit_remote/client/js_object_test.rb",
     "test/webkit_remote/client/network_test.rb",
