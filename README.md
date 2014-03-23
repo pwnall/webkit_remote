@@ -26,6 +26,7 @@ have been implemented:
 
 * Console
 * DOM (incomplete)
+* Input
 * Network
 * Page
 * Remote

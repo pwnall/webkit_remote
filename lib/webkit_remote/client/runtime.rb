@@ -88,7 +88,7 @@ end  # module WebkitRemote::Client::Runtime
 
 initializer :initialize_runtime
 clearer :clear_runtime
-include Runtime
+include WebkitRemote::Client::Runtime
 
 # The class of the JavaScript undefined object.
 class UndefinedClass
