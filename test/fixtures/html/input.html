@@ -14,24 +14,40 @@
   </head>
   <body>
     <form action="#">
-      <input type="text" placeholder="Input test" />
+      <input type="text" placeholder="Input test" autofocus="autofocus" />
     </form>
     <script type="text/javascript">
-      var eventDetails = function (event) {
+      var mouseEventDetails = function (event) {
         return "x: " + event.clientX + " y: " + event.clientY +
           " button: " + event.button + " detail: " + event.detail +
           " shift: " + event.shiftKey + " ctrl: " + event.ctrlKey + " alt: " +
           event.altKey + " meta: " + event.metaKey;
       };
+      var keyEventDetails = function (event) {
+        return "keyCode: " + event.keyCode + " charCode: " + event.charCode +
+          " keyIdentifier: " + event.keyIdentifier + " text: " + event.text +
+          " repeat: " + event.repeat + " shift: " + event.shiftKey +
+          " ctrl: " + event.ctrlKey + " alt: " + event.altKey +
+          " meta: " + event.metaKey;
+      };
       var node = document.querySelector("input[type=text]");
       node.addEventListener('mousedown', function (event) {
-        console.log("Down. " + eventDetails(event));
+        console.log("Down. " + mouseEventDetails(event));
       });
       node.addEventListener('mouseup', function (event) {
-        console.log("Up. " + eventDetails(event));
+        console.log("Up. " + mouseEventDetails(event));
       });
       node.addEventListener('mousemove', function (event) {
-        console.log("Move. " + eventDetails(event));
+        console.log("Move. " + mouseEventDetails(event));
+      });
+      window.addEventListener('keydown', function (event) {
+        console.log("KDown. " + keyEventDetails(event));
+      });
+      window.addEventListener('keyup', function (event) {
+        console.log("KUp. " + keyEventDetails(event));
+      });
+      window.addEventListener('keypress', function (event) {
+        console.log("KPress. " + keyEventDetails(event));
       });
     </script>
   </body>
