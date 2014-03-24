@@ -19,7 +19,7 @@ describe WebkitRemote::Client do
     @client.browser.must_equal @browser
   end
 
-  describe 'close with close_browser is true' do
+  describe '#close with close_browser is true' do
     before do
       @client.close_browser = true
       @client.close
@@ -38,7 +38,7 @@ describe WebkitRemote::Client do
     end
   end
 
-  describe 'each_event' do
+  describe '#each_event' do
     before do
       @client.rpc.call 'Page.enable'
       @client.rpc.call 'Page.navigate', url: fixture_url(:load)
@@ -60,7 +60,7 @@ describe WebkitRemote::Client do
     end
   end
 
-  describe 'wait_for' do
+  describe '#wait_for' do
     describe 'with page_events enabled' do
       before do
         @client.page_events = true
@@ -83,7 +83,7 @@ describe WebkitRemote::Client do
     end
   end
 
-  describe 'rpc' do
+  describe '#rpc' do
     it 'is is a non-closed WebkitRemote::Rpc instance' do
       @client.rpc.must_be_kind_of WebkitRemote::Rpc
       @client.rpc.closed?.must_equal false
@@ -101,13 +101,13 @@ describe WebkitRemote::Client do
     end
   end
 
-  describe 'clear_all' do
+  describe '#clear_all' do
     it 'does not crash' do
       @client.clear_all
     end
   end
 
-  describe 'inspect' do
+  describe '#inspect' do
     it 'includes the debugging URL and closed flag' do
       @client.inspect.must_match(
         /<WebkitRemote::Client:.*\s+server=".*"\s+closed=.+>/)

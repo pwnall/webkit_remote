@@ -56,6 +56,13 @@ describe WebkitRemote::Process do
           end
         end
       end
+
+      describe '#inspect' do
+        it 'includes the CLI, PID and running state' do
+          @process.inspect.must_match(
+              /<WebkitRemote::Process:.*\s+cli=\[.*\]\s+pid=\d+\s+running=.*>/)
+        end
+      end
     end
   end
 
@@ -115,7 +122,7 @@ describe WebkitRemote::Process do
       @process.stop if @process
     end
 
-    it 'raises an exception' do
+    it '#start raises an exception' do
       begin
         @process.start
         fail 'no exception raised'

@@ -5,7 +5,7 @@ module WebkitRemote
 
 # The master connection to the remote debugging server in a Webkit process.
 class Browser
-  # Sets up a debugging connection to a Webkit processr.
+  # Sets up a debugging connection to a Webkit process.
   #
   # @param [Hash] opts info on the browser to connect to
   # @option opts [String] host the hostname / IP address of the Webkit remote

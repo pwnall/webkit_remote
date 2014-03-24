@@ -311,6 +311,14 @@ class Process
     @xvfb_binary ||= nil
   end
   @xvfb_binary = false
+
+  # Debugging output.
+  def inspect
+    result = self.to_s
+    result[-1, 0] =
+        " cli=#{@cli.inspect} pid=#{@pid.inspect} running=#{@running.inspect}"
+    result
+  end
 end  # class WebkitRemote::Browser
 
 end  # namespace WebkitRemote
