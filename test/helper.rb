@@ -17,7 +17,7 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'webkit_remote'
 
-require 'debugger'
+require 'byebug'
 require 'pp'
 require 'thread'
 Thread.abort_on_exception = true

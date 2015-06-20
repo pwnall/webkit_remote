@@ -13,19 +13,19 @@ module Page
     self
   end
 
-  # Reloads
+  # Reloads the current page.
   #
   # @param [Hash] opts quirky behavior bits
   # @option opts [Boolean] skip_cache if true, the cache is not used; this is
-  #     what happens when the user presses Shift+refresh
+  #     what happens when the user presses Shift + the refresh combo
   # @option opts [String] onload a JavaScript that will be injected in all the
   #     page's frames after reloading
   # @return [WebkitRemote::Client] self
-  def refresh(opts = {})
+  def reload(opts = {})
     options = {}
     options[:ignoreCache] = true if opts[:skip_cache]
     options[:scriptToEvaluateOnLoad] = opts[:onload] if opts[:onload]
-    @rpc.call 'Page.refresh', options
+    @rpc.call 'Page.reload', options
     self
   end
 
