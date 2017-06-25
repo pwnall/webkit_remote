@@ -104,10 +104,6 @@ class UndefinedClass
     true
   end
 
-  def nil?
-    true
-  end
-
   def to_a
     []
   end
@@ -505,6 +501,62 @@ class JsProperty
     result
   end
 end  # class WebkitRemote::Client::JsProperty
+
+# The call stack that represents the context of an assertion or error.
+class StackTrace
+  # Parses a StackTrace object returned by a RPC request.
+  #
+  # @param [Array<String, Object>] raw_stack_trace the raw StackTrace object
+  #     in the Runtime domain returned by an RPC request
+  def initialize(raw_stack_trace)
+    @description = raw_stack_trace['description']
+    @frames = raw_stack_trace['callFrames'].map do |raw_frame|
+      frame = {}
+      if raw_frame['columnNumber']
+        frame[:column] = raw_frame['columnNumber'].to_i
+      end
+      if raw_frame['lineNumber']
+        frame[:line] = raw_frame['lineNumber'].to_i
+      end
+      if raw_frame['functionName']
+        frame[:function] = raw_frame['functionName']
+      end
+      if raw_frame['url']
+        frame[:url] = raw_frame['url']
+      end
+      frame
+    end
+
+    parent_trace = raw_stack_trace['parent']
+    if parent_trace
+      @parent = StackTrace.new parent_trace
+    else
+      @parent = nil
+    end
+  end
+
+  # @return [String] label of the trace; for async traces, might be the name of
+  #      a function that initiated the async call
+  attr_reader :description
+
+  # @return [Array<Symbol, Object>] Ruby-friendly stack trace
+  attr_reader :frames
+
+  # @return [WebkitRemote::Client::StackTrace] stack trace for a parent async
+  #     call; may be null
+  attr_reader :parent
+
+  # Parses a StackTrace object returned by a RPC request.
+  #
+  # @param [Array<String, Object>] raw_stack_trace the raw StackTrace object
+  #     in the Runtime domain returned by an RPC request
+  # @return [WebkitRemote::Client::StackTrace]
+  def self.parse(raw_stack_trace)
+    return nil unless raw_stack_trace
+
+    StackTrace.new raw_stack_trace
+  end
+end  # class WebkitRemote::Client::StackTrace
 
 end  # namespace WebkitRemote::Client
 

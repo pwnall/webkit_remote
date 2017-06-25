@@ -57,7 +57,7 @@ describe WebkitRemote::Client::DomNode do
     describe 'with a selector that does not match' do
       it 'returns nil' do
         node = @root.query_selector '#this-id-should-not-exist'
-        node.must_equal nil
+        node.must_be_nil
       end
     end
   end

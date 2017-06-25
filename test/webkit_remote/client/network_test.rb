@@ -82,7 +82,7 @@ describe WebkitRemote::Client::Network do
       @requests[0].request.headers.must_include 'User-Agent'
       @requests[0].request.headers['User-Agent'].must_match(/webkit/i)
       @requests[0].initiator.type.must_equal :other
-      @requests[0].initiator.stack_trace.must_equal nil
+      @requests[0].initiator.stack_trace.must_be_nil
     end
 
     it 'parses derived requests inside NetworkRequest events' do
@@ -90,21 +90,20 @@ describe WebkitRemote::Client::Network do
       @requests[1].request.must_be_kind_of WebkitRemote::Client::NetworkRequest
       @requests[1].request.url.must_equal fixture_url(:network_not_found, :js)
       @requests[1].initiator.type.must_equal :parser
-      @requests[1].initiator.stack_trace.must_equal nil
+      @requests[1].initiator.stack_trace.must_be_nil
 
       @requests[2].document_url.must_equal fixture_url(:network)
       @requests[2].request.must_be_kind_of WebkitRemote::Client::NetworkRequest
       @requests[2].request.url.must_equal fixture_url(:network, :js)
       @requests[2].initiator.type.must_equal :parser
-      @requests[2].initiator.stack_trace.must_equal nil
+      @requests[2].initiator.stack_trace.must_be_nil
 
       @requests[3].document_url.must_equal fixture_url(:network)
       @requests[3].request.must_be_kind_of WebkitRemote::Client::NetworkRequest
       @requests[3].request.url.must_equal fixture_url(:network, :png)
       @requests[3].initiator.type.must_equal :script
-      @requests[3].initiator.stack_trace.must_equal [
-        {column: 7, line: 10, function: "", url: fixture_url(:network, :js)},
-        {column: 3, line: 11, function: "", url: fixture_url(:network, :js)},
+      @requests[3].initiator.stack_trace.frames.must_equal [
+        {column: 6, line: 9, function: "", url: fixture_url(:network, :js)},
       ]
     end
 
@@ -146,7 +145,7 @@ describe WebkitRemote::Client::Network do
       @responses[1].response.url.
                     must_equal fixture_url(:network_not_found, :js)
       @responses[1].response.status.must_equal 404
-      @responses[1].response.status_text.must_match /not found/i
+      @responses[1].response.status_text.must_match(/not found/i)
       @responses[1].response.headers.must_include 'X-Unit-Test'
       @responses[1].response.headers['X-Unit-Test'].must_equal 'webkit-remote'
       @responses[1].response.mime_type.must_equal 'text/plain'
@@ -170,7 +169,9 @@ describe WebkitRemote::Client::Network do
       @chunks[0].resource.must_equal @chunks[0].resource
       @chunks[0].data_length.
                  must_equal File.read(fixture_path(:network)).length
-      @chunks[0].bytes_received.must_be :>, 0
+      @chunks[0].bytes_received.must_be :>=, 0
+
+      @chunks.map(&:bytes_received).max.must_be :>, 0
     end
 
     it 'receives NetworkLoad events' do
@@ -211,7 +212,7 @@ describe WebkitRemote::Client::Network do
       @resources[2].document_url.must_equal fixture_url(:network)
       @resources[2].initiator.must_equal @requests[2].initiator
       @resources[2].canceled.must_equal false
-      @resources[2].error.must_equal nil
+      @resources[2].error.must_be_nil
       @resources[2].last_event.must_equal @loads[1]
       @resources[2].client.must_equal @client
 
@@ -222,7 +223,7 @@ describe WebkitRemote::Client::Network do
       @resources[3].document_url.must_equal fixture_url(:network)
       @resources[3].initiator.must_equal @requests[3].initiator
       @resources[3].canceled.must_equal false
-      @resources[3].error.must_equal nil
+      @resources[3].error.must_be_nil
       @resources[3].last_event.must_equal @loads[2]
       @resources[3].client.must_equal @client
 
@@ -234,7 +235,6 @@ describe WebkitRemote::Client::Network do
     end
 
     it 'retrieves the body for a binary NetworkResource' do
-      skip 'waiting for http://crbug.com/160397'
       @resources[3].body.must_equal File.binread(fixture_path(:network, :png))
     end
   end

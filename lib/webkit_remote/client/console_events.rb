@@ -48,31 +48,6 @@ class ConsoleMessage < WebkitRemote::Event
   end
 end  # class WebkitRemote::Event::ConsoleMessage
 
-# Emitted when the same console message is produced repeatedly.
-class ConsoleMessageRepeated < WebkitRemote::Event
-  register 'Console.messageRepeatCountUpdated'
-
-  # @return [WebkitRemote::Client::ConsoleMessage] the repeated message
-  attr_reader :message
-
-  # @return [Number] the number of times that the message was repeated
-  attr_reader :count
-
-  # @private Use Event#for instead of calling this constructor directly.
-  def initialize(rpc_event, client)
-    super
-
-    @message = client.console_messages.last
-    @count = raw_data['count'] ? raw_data['count'].to_i : nil
-    @message.count = @count if @count
-  end
-
-  # @private Use Event#can_receive instead of calling this directly.
-  def self.can_reach?(client)
-    client.console_events
-  end
-end  # class WebkitRemote::Event::ConsoleMessageRepeated
-
 # Emitted when the console is cleared.
 class ConsoleCleared < WebkitRemote::Event
   register 'Console.messagesCleared'

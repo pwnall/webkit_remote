@@ -56,7 +56,7 @@ describe WebkitRemote::Client::JsObjectGroup do
         @group1.released?.must_equal true
       end
       it 'removes the group from the client' do
-        @client.object_group('g1').must_equal nil
+        @client.object_group('g1').must_be_nil
       end
     end
   end
@@ -75,7 +75,7 @@ describe WebkitRemote::Client::JsObjectGroup do
     end
     it 'releases the group and removes the group from the client' do
       @group1.released?.must_equal true
-      @client.object_group('g1').must_equal nil
+      @client.object_group('g1').must_be_nil
     end
   end
 end

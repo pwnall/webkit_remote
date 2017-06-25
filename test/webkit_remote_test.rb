@@ -3,7 +3,7 @@ require File.expand_path('helper.rb', File.dirname(__FILE__))
 describe WebkitRemote do
   describe 'local' do
     before do
-      @client = WebkitRemote.local port: 9669, xvfb: true
+      @client = WebkitRemote.local port: 9669, headless: true
     end
     after do
       @client.close
@@ -29,7 +29,7 @@ describe WebkitRemote do
 
   describe 'remote' do
     before do
-      @process = WebkitRemote::Process.new port: 9669, xvfb: true
+      @process = WebkitRemote::Process.new port: 9669, headless: true
       browser = @process.start
       browser.close
       @client = WebkitRemote.remote host: 'localhost', port: 9669

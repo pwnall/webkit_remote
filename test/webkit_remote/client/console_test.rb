@@ -27,9 +27,6 @@ describe WebkitRemote::Client::Console do
         @client.wait_for type: WebkitRemote::Event::ConsoleMessage
       }.must_raise ArgumentError
       lambda {
-        @client.wait_for type: WebkitRemote::Event::ConsoleMessageRepeated
-      }.must_raise ArgumentError
-      lambda {
         @client.wait_for type: WebkitRemote::Event::ConsoleCleared
       }.must_raise ArgumentError
     end
@@ -43,9 +40,6 @@ describe WebkitRemote::Client::Console do
       @message_events = @events.select do |event|
         event.kind_of? WebkitRemote::Event::ConsoleMessage
       end
-      @repeat_events = @events.select do |event|
-        event.kind_of? WebkitRemote::Event::ConsoleMessageRepeated
-      end
       @messages = @client.console_messages
     end
 
@@ -57,30 +51,28 @@ describe WebkitRemote::Client::Console do
       @message_events.wont_be :empty?
     end
 
-    it 'receives ConsoleMessageRepeated events' do
-      @repeat_events.wont_be :empty?
-    end
-
     it 'collects messages into Client#console_messages' do
       @message_events[0].message.must_equal @messages[0]
       @message_events[1].message.must_equal @messages[1]
       @message_events[2].message.must_equal @messages[2]
       @message_events[3].message.must_equal @messages[3]
-      @repeat_events[0].message.must_equal @messages[3]
-      @repeat_events[1].message.must_equal @messages[3]
     end
 
     it 'parses text correctly' do
       @messages[0].text.must_equal 'hello ruby'
-      @messages[0].params.must_equal ['hello ruby']
       @messages[0].level.must_equal :warning
-      @messages[0].count.must_equal 1
       @messages[0].reason.must_equal :console_api
-      @messages[0].type.must_equal :log
       @messages[0].source_url.must_equal fixture_url(:console)
       @messages[0].source_line.must_equal 7
+
+      @messages[1].text.must_equal 'stack test'
+      @messages[1].level.must_equal :log
+      @messages[2].text.must_match(/^params /)
+      @messages[2].level.must_equal :error
     end
 
+=begin
+    TODO(pwnall): Stacks are now available in Runtime.consoleAPICalled
     it 'parses the stack trace correctly' do
       @messages[1].text.must_equal 'stack test'
       @messages[1].level.must_equal :log
@@ -92,6 +84,7 @@ describe WebkitRemote::Client::Console do
       ]
     end
 
+    TODO(pwnall): Params are now available as args in Runtime.consoleAPICalled
     it 'parses parameters correctly' do
       @messages[2].text.must_match(/^params /)
       @messages[2].level.must_equal :error
@@ -100,16 +93,11 @@ describe WebkitRemote::Client::Console do
 
       @messages[2].params[3].must_be_kind_of WebkitRemote::Client::JsObject
       @messages[2].params[3].properties['hello'].value.must_equal 'ruby'
-      @messages[2].params[3].group.name.must_equal nil
+      @messages[2].params[3].group.name.must_be_nil
     end
+=end
 
-    it 'parses repeated messages correctly' do
-      @messages[3].text.must_equal 'one more time'
-      @messages[3].count.must_equal 3
-      @repeat_events[0].count.must_equal 2
-      @repeat_events[1].count.must_equal 3
-    end
-
+=begin
     describe 'clear_console' do
       before :all do
         @client.clear_console
@@ -135,8 +123,11 @@ describe WebkitRemote::Client::Console do
         @message_events[2].message.params[3].released?.must_equal true
       end
     end
+=end
   end
 
+=begin
+  TODO(pwnall): These events are now available as Log.entryAdded
   describe 'with console and network events enabled' do
     before :all do
       @client.console_events = true
@@ -159,7 +150,7 @@ describe WebkitRemote::Client::Console do
     end
 
     it 'associates messages with network requests' do
-      @messages[0].text.must_match /not found/i
+      @messages[0].text.must_match(/not found/i)
       @messages[0].network_resource.wont_equal nil
       @messages[0].network_resource.document_url.
           must_equal fixture_url(:network)
@@ -169,4 +160,5 @@ describe WebkitRemote::Client::Console do
       @messages[0].type.must_equal :log
     end
   end
+=end
 end

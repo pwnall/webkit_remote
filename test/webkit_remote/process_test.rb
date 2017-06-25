@@ -1,9 +1,9 @@
 require File.expand_path('../helper.rb', File.dirname(__FILE__))
 
 describe WebkitRemote::Process do
-  describe 'on Xvfb' do
+  describe 'in headless mode' do
     before :each do
-      @process = WebkitRemote::Process.new port: 9669, xvfb: true
+      @process = WebkitRemote::Process.new port: 9669, headless: true
     end
     after :each do
       @process.stop if @process
@@ -60,7 +60,11 @@ describe WebkitRemote::Process do
       describe '#inspect' do
         it 'includes the CLI, PID and running state' do
           @process.inspect.must_match(
-              /<WebkitRemote::Process:.*\s+cli=\[.*\]\s+pid=\d+\s+running=.*>/)
+              /<WebkitRemote::Process:.*\s@cli=\[.*\].*>/)
+          @process.inspect.must_match(
+              /<WebkitRemote::Process:.*\s@pid=\d+.*>/)
+          @process.inspect.must_match(
+              /<WebkitRemote::Process:.*\s@running=.*>/)
         end
       end
     end

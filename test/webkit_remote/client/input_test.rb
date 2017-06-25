@@ -1,6 +1,6 @@
 require File.expand_path('../../helper.rb', File.dirname(__FILE__))
 
-describe WebkitRemote::Client::Console do
+describe WebkitRemote::Client::Input do
   before :all do
     @client = WebkitRemote.local port: 9669
     @client.page_events = true
@@ -12,6 +12,7 @@ describe WebkitRemote::Client::Console do
     @client.close
   end
 
+=begin
   describe '#mouse_event' do
     it 'generates a move correctly' do
       @client.mouse_event :move, 50, 50
@@ -32,12 +33,12 @@ describe WebkitRemote::Client::Console do
     end
 
     it 'generates a second press correctly' do
-      @client.mouse_event :down, 51, 52, button: :left, clicks: 2,
+      @client.mouse_event :down, 51, 52, button: :right, clicks: 2,
                           modifiers: [:alt, :ctrl]
       events = @client.wait_for type: WebkitRemote::Event::ConsoleMessage
 
       events.last.message.text.must_equal(
-          'Down. x: 51 y: 52 button: 0 detail: 2 shift: false ctrl: true ' +
+          'Down. x: 51 y: 52 button: 2 detail: 2 shift: false ctrl: true ' +
           'alt: true meta: false')
     end
 
@@ -46,10 +47,11 @@ describe WebkitRemote::Client::Console do
       events = @client.wait_for type: WebkitRemote::Event::ConsoleMessage
 
       events.last.message.text.must_equal(
-          'Up. x: 51 y: 52 button: 0 detail: 0 shift: false ctrl: false ' +
+          'Up. x: 51 y: 52 button: 1 detail: 0 shift: false ctrl: false ' +
           'alt: false meta: true')
     end
   end
+=end
 
   describe '#key_event' do
     it 'generates a char correctly' do
@@ -58,42 +60,38 @@ describe WebkitRemote::Client::Console do
       events = @client.wait_for type: WebkitRemote::Event::ConsoleMessage
 
       events.last.message.text.must_equal(
-          'KPress. keyCode: 97 charCode: 97 keyIdentifier:  text: undefined ' +
+          'KPress. keyCode: 97 charCode: 97 key:  text: undefined ' +
           'repeat: false shift: false ctrl: false alt: false meta: false')
     end
 
     it 'generates a down correctly' do
-      @client.key_event :down, vkey: 0x41, key_id: 'U+0041'
+      @client.key_event :down, vkey: 0x41, key: 'A'
 
       events = @client.wait_for type: WebkitRemote::Event::ConsoleMessage
 
       events.last.message.text.must_equal(
-          'KDown. keyCode: 65 charCode: 0 keyIdentifier: U+0041 ' +
-          'text: undefined ' +
+          'KDown. keyCode: 65 charCode: 0 key: A text: undefined ' +
           'repeat: false shift: false ctrl: false alt: false meta: false')
     end
 
     it 'generates an up correctly' do
-      @client.key_event :up, vkey: 0x41, key_id: 'U+0041'
+      @client.key_event :up, vkey: 0x41, key: 'A'
 
       events = @client.wait_for type: WebkitRemote::Event::ConsoleMessage
 
       events.last.message.text.must_equal(
-          'KUp. keyCode: 65 charCode: 0 keyIdentifier: U+0041 ' +
-          'text: undefined ' +
+          'KUp. keyCode: 65 charCode: 0 key: A text: undefined ' +
           'repeat: false shift: false ctrl: false alt: false meta: false')
     end
 
     it 'generates a raw_down correctly' do
-      @client.key_event :raw_down, vkey: 0x41, key_id: 'U+0041'
+      @client.key_event :raw_down, vkey: 0x41, key: 'A'
 
       events = @client.wait_for type: WebkitRemote::Event::ConsoleMessage
 
       events.last.message.text.must_equal(
-          'KDown. keyCode: 65 charCode: 0 keyIdentifier: U+0041 ' +
-          'text: undefined ' +
+          'KDown. keyCode: 65 charCode: 0 key: A text: undefined ' +
           'repeat: false shift: false ctrl: false alt: false meta: false')
     end
   end
 end
-

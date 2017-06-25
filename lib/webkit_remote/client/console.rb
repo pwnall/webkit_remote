@@ -21,8 +21,9 @@ module Console
   #
   # @return [WebkitRemote::Client] self
   def clear_console
-    @rpc.call 'Console.clearMessages'
-    console_cleared
+    @rpc.call 'Runtime.discardConsoleEntries'
+    @console_messages.each(&:release_params)
+    @console_messages.clear
     self
   end
 
@@ -35,12 +36,6 @@ module Console
   # @private Called by the ConsoleMessage event constructor
   def console_add_message(message)
     @console_messages << message
-  end
-
-  # @private Called by the ConsoleCleared event constructor.
-  def console_cleared
-    @console_messages.each(&:release_params)
-    @console_messages.clear
   end
 
   # @private Called by the Client constructor to set up Console data.
@@ -68,9 +63,6 @@ class ConsoleMessage
   # The documented values are :debug, :error, :log, :tip, and :warning.
   attr_reader :level
 
-  # @return [Integer] how many times this message was repeated
-  attr_accessor :count
-
   # @return [Symbol] the component that produced this message
   #
   # The documented values are :console_api, :html, :javascript, :network,
@@ -82,12 +74,6 @@ class ConsoleMessage
   #
   # This is set for console messages that indicate network errors.
   attr_reader :network_resource
-
-  # @return [Symbol] the behavior that produced this message
-  #
-  # The documented values are :assert, :dir, :dirxml, :endGroup, :log,
-  #     :startGroup, :startGroupCollapsed, and :trace.
-  attr_reader :type
 
   # @return [String] the URL of the file that caused this message
   attr_reader :source_url
@@ -121,7 +107,6 @@ class ConsoleMessage
       @params = []
     end
     @params.freeze
-    @count = raw_message['repeatCount'] ? raw_message['repeatCount'].to_i : 1
     if raw_message['source']
       @reason = raw_message['source'].gsub('-', '_').to_sym
     else
@@ -129,7 +114,6 @@ class ConsoleMessage
     end
     @stack_trace = self.class.parse_stack_trace raw_message['stackTrace']
     @text = raw_message['text']
-    @type = raw_message['type'] ? raw_message['type'].to_sym : nil
     @source_url = raw_message['url']
   end
 

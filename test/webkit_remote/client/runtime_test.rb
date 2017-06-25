@@ -21,7 +21,7 @@ describe WebkitRemote::Client::Runtime do
         @number.must_equal 42
       end
       it 'does not create an object group' do
-        @client.object_group('no').must_equal nil
+        @client.object_group('no').must_be_nil
       end
     end
 
@@ -35,7 +35,7 @@ describe WebkitRemote::Client::Runtime do
         @false.must_equal false
       end
       it 'does not create an object group' do
-        @client.object_group('no').must_equal nil
+        @client.object_group('no').must_be_nil
       end
     end
 
@@ -47,7 +47,7 @@ describe WebkitRemote::Client::Runtime do
         @string.must_equal 'hello Ruby'
       end
       it 'does not create an object group' do
-        @client.object_group('no').must_equal nil
+        @client.object_group('no').must_be_nil
       end
     end
 
@@ -56,10 +56,10 @@ describe WebkitRemote::Client::Runtime do
         @null  = @client.remote_eval 'null', group: 'no'
       end
       it 'returns nil' do
-        @string.must_equal nil
+        @string.must_be_nil
       end
       it 'does not create an object group' do
-        @client.object_group('no').must_equal nil
+        @client.object_group('no').must_be_nil
       end
     end
 
@@ -78,7 +78,7 @@ describe WebkitRemote::Client::Runtime do
         @undefined.empty?.must_equal true
       end
       it 'does not create an object group' do
-        @client.object_group('no').must_equal nil
+        @client.object_group('no').must_be_nil
       end
       it 'is idempotent' do
         @undefined.must_equal @client.remote_eval('(function(){})()')
@@ -149,7 +149,7 @@ describe WebkitRemote::Client::Runtime do
       end
 
       it 'sets the object properties correctly' do
-        @function.js_class_name.must_equal 'Object'
+        @function.js_class_name.must_equal 'Function'
         @function.js_type.must_equal :function
         @function.description.must_equal 'function (a, b) { return a + b; }'
       end
@@ -176,7 +176,7 @@ describe WebkitRemote::Client::Runtime do
       it 'releases the object and its group' do
         @client.clear_all
         @object.released?.must_equal true
-        @client.object_group('yes').must_equal nil
+        @client.object_group('yes').must_be_nil
       end
     end
   end

@@ -20,7 +20,7 @@ describe WebkitRemote::Client::JsObject do
       it 'enumerates the properties correctly' do
         @object.properties['answer'].name.must_equal 'answer'
         @object.properties['test'].name.must_equal 'test'
-        @object.properties['other'].must_equal nil
+        @object.properties['other'].must_be_nil
       end
 
       it 'gets the correct values' do

@@ -150,12 +150,6 @@ class NetworkRequest < WebkitRemote::Event
       @redirect_response = WebkitRemote::Client::NetworkResponse.new(
           raw_data['redirectResponse'])
     end
-    if raw_data['stackTrace']
-      @stack_trace = WebkitRemote::Client::ConsoleMessage.parse_stack_trace(
-          raw_initiator['stackTrace'])
-    else
-      @stack_trace = nil
-    end
     @timestamp = raw_data['timestamp']
 
     @resource = client.network_resource raw_data['requestId']
@@ -509,7 +503,8 @@ class NetworkRequestInitiator
   # @return [Number] number of the line that references the requested resource
   attr_reader :line
 
-  # @return [WebkitRemote::Console
+  # @return [WebkitRemote::Client::StackTrace] JavaScript trace, set only for
+  #     :script initiators
   attr_reader :stack_trace
 
   # @private Use Event#for instead of calling this constructor directly
@@ -519,8 +514,8 @@ class NetworkRequestInitiator
     else
       @line = nil
     end
-    @stack_trace = WebkitRemote::Client::ConsoleMessage.parse_stack_trace(
-        raw_initiator['stackTrace'])
+
+    @stack_trace = WebkitRemote::Client::StackTrace.parse raw_initiator['stack']
     @type = (raw_initiator['type'] || 'other').to_sym
     @url = raw_initiator['url']
   end
