@@ -5,6 +5,9 @@ module WebkitRemote
 
 # RPC client for the Webkit remote debugging protocol.
 class Rpc
+  # 2 minutes of waiting for RPC response
+  READ_TIMEOUT = 120
+
   # Connects to the remote debugging server in a Webkit tab.
   #
   # @param [Hash] opts info on the tab to connect to
@@ -97,7 +100,17 @@ class Rpc
   # @return [Hash<String, Object>, nil] a Hash containing the RPC result if an
   #     expected RPC response was received; nil if an RPC notice was received
   def receive_message(expected_id)
-    json = @web_socket.recv_frame
+    json = nil
+
+    ::Timeout::timeout(READ_TIMEOUT) do
+      json = @web_socket.recv_frame
+    end
+
+    if json == :closed
+      close
+      raise RuntimeError, 'Connection to remote Webkit has been closed unexpectedly'
+    end
+
     begin
       data = JSON.parse json
     rescue JSONError
@@ -125,6 +138,8 @@ class Rpc
       close
       raise RuntimeError, "Unexpected / invalid RPC message #{data.inspect}"
     end
+  rescue ::Timeout::Error => e
+    raise RuntimeError, "No response received from remote Webkit in #{READ_TIMEOUT} seconds"
   end
   private :receive_message
 end  # class WebkitRemote::Rpc
