@@ -100,11 +100,13 @@ class Rpc
   # @return [Hash<String, Object>, nil] a Hash containing the RPC result if an
   #     expected RPC response was received; nil if an RPC notice was received
   def receive_message(expected_id)
+    json = nil
+
     ::Timeout::timeout(READ_TIMEOUT) do
       json = @web_socket.recv_frame
     end
 
-    if json == :closed do
+    if json == :closed
       close
       raise RuntimeError, 'Connection to remote Webkit has been closed unexpectedly'
     end
