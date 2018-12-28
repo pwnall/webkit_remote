@@ -106,7 +106,7 @@ class Rpc
 
     if json == :closed do
       close
-      raise RuntimeError, 'Connection to remote Chrome has been closed unexpectedly'
+      raise RuntimeError, 'Connection to remote Webkit has been closed unexpectedly'
     end
 
     begin
@@ -136,6 +136,8 @@ class Rpc
       close
       raise RuntimeError, "Unexpected / invalid RPC message #{data.inspect}"
     end
+  rescue ::Timeout::Error => e
+    raise RuntimeError, "No response received from remote Webkit in #{READ_TIMEOUT} seconds"
   end
   private :receive_message
 end  # class WebkitRemote::Rpc
